@@ -1,0 +1,19 @@
+# TC01 [happy path][smoke] Fresh install: onboarding completes and the Explore feed is shown.
+appId: ${APP_ID}
+tags: [smoke, happy, functional]
+---
+- launchApp:
+    clearState: true
+- assertVisible: "All the world's knowledge"      # onboarding page 1 is shown on fresh install
+- assertVisible: "Learn more about Wikipedia"
+- assertNotVisible: "No results"
+- runFlow: ../../pom/android/pages/onboarding_complete.yaml
+- assertNotVisible: "Forward"                     # carousel fully dismissed
+- assertNotVisible: "All the world's knowledge"
+- assertVisible: "Featured article"               # Explore feed content rendered
+- assertVisible: "Home"
+- assertVisible: "Saved"
+- assertVisible: "Search"
+- assertVisible: "Activity"
+- assertVisible: "More"
+- runFlow: ../../pom/android/pages/app_assert_no_crash.yaml

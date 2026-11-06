@@ -1,0 +1,21 @@
+# TC08 [negative][search] Markup / injection-like input is handled safely: no crash, no results, input echoed as text.
+appId: ${APP_ID}
+tags: [regression, negative, search]
+---
+- runFlow: ../subflows/start_at_search.yaml
+- runFlow:
+    file: ../../pom/android/pages/search_enter_query.yaml
+    env: { QUERY: "<script>alert(1)</script>" }
+- runFlow:
+    file: ../../pom/android/pages/search_assert_query_text.yaml
+    env: { QUERY: "<script>alert(1)</script>" }   # not interpreted or stripped
+- runFlow: ../../pom/android/pages/search_assert_field_alive.yaml
+- runFlow: ../../pom/android/pages/app_assert_no_crash.yaml
+- runFlow:
+    file: ../../pom/android/pages/search_enter_query.yaml
+    env: { QUERY: "'; DROP TABLE users;--" }
+- runFlow:
+    file: ../../pom/android/pages/search_assert_query_text.yaml
+    env: { QUERY: "'; DROP TABLE users;--" }
+- runFlow: ../../pom/android/pages/search_assert_field_alive.yaml
+- runFlow: ../../pom/android/pages/app_assert_no_crash.yaml

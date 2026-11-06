@@ -1,0 +1,7 @@
+# Test setup: fresh install state -> onboarding done -> Search box focused.
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../pom/android/pages/onboarding_complete.yaml
+- runFlow: ../../pom/android/pages/home_open_search.yaml

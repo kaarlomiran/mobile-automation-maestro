@@ -21,6 +21,14 @@ Maestro flows for native Android and iOS apps. Maestro runs decide pass/fail; ne
 - Extract repeated steps into flows/subflows and call them with runFlow.
 - Test data via -e variables; no credentials in YAML.
 
+## Run outputs (mandatory)
+- Runs: ./scripts/run-android-report.sh (one device) or ./scripts/run-matrix.sh (all devices in config/devices.csv); iOS later: run-ios-report.sh.
+- Outputs: one folder per run inside each of runs/{screenshots,recordings,trace,report,video}/, named <YYYY-MM-DD_HHMMSS>_cycle-<NN>_<platform>[_<device>] (cycle restarts each date).
+- After EVERY run on EITHER platform and every device, invoke the verify-run-outputs skill (.claude/skills/verify-run-outputs) and report its variances. Never skip.
+- Devices: config/devices.csv (small phone, large phone, tablet on latest Android + API 31 baseline). See docs/DEVICE-MATRIX.md.
+- POM: page objects live in the separate repo mobile-pom-maestro, fetched into ./pom by scripts/sync-pom.sh (pinned in pom.lock). Selectors go there only.
+- Every test needs assertions on start state, expected result and no-crash; a bare action without an assertion is not a test.
+
 ## Workflow for changes
 1. Inspect the screen (inspect_screen) before writing selectors.
 2. Run the flow on a device and fix failures.

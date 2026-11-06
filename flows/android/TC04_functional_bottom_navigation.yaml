@@ -1,0 +1,28 @@
+# TC04 [functional] Every bottom-nav tab opens its screen.
+# Finding: first visit to Activity shows a full-screen "Introducing Activity" intro that hides the nav bar.
+appId: ${APP_ID}
+tags: [regression, functional]
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../pom/android/pages/onboarding_complete.yaml
+- assertVisible: "Featured article"                       # starts on Home / Explore
+- runFlow:
+    file: ../../pom/android/pages/nav_go_to_tab.yaml
+    env: { TAB_ID: nav_tab_reading_lists }
+- assertVisible: "Saved"
+- assertNotVisible: "Featured article"                    # Home content gone
+- runFlow:
+    file: ../../pom/android/pages/nav_go_to_tab.yaml
+    env: { TAB_ID: nav_tab_edits }
+- assertVisible: "Introducing Activity"
+- assertVisible: "Continue"
+- assertNotVisible: "Saved"
+- back
+- runFlow:
+    file: ../../pom/android/pages/nav_go_to_tab.yaml
+    env: { TAB_ID: nav_tab_home }
+- assertVisible: "Featured article"                       # back on Home with content
+- assertVisible:
+    id: "org.wikipedia:id/nav_tab_home"
+- runFlow: ../../pom/android/pages/app_assert_no_crash.yaml

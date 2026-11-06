@@ -1,0 +1,20 @@
+# TC10 [boundary][search] Max length is 300: exactly 300 chars is accepted, 301 is rejected with a clear error.
+# Finding (run 002): app returns "Search request is longer than the maximum allowed length. (Actual: 396; allowed: 300)".
+appId: ${APP_ID}
+tags: [regression, boundary, search]
+---
+- runFlow: ../subflows/start_at_search.yaml
+- runFlow:
+    file: ../../pom/android/pages/search_enter_query.yaml
+    env:
+      QUERY: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+- runFlow: ../../pom/android/pages/search_assert_field_alive.yaml
+- runFlow: ../../pom/android/pages/search_assert_query_within_limit.yaml      # 300 = at the limit: accepted
+- runFlow: ../../pom/android/pages/app_assert_no_crash.yaml
+- runFlow:
+    file: ../../pom/android/pages/search_append_text.yaml
+    env: { APPEND: "a" }                                                    # 301 = over the limit
+- runFlow:
+    file: ../../pom/android/pages/search_assert_query_too_long.yaml
+    env: { ACTUAL: "301" }
+- runFlow: ../../pom/android/pages/app_assert_no_crash.yaml
