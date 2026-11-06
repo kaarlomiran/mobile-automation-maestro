@@ -1,0 +1,9 @@
+# Android device matrix - the single place to add, remove or update targets.
+# columns: id,avd_name,profile,api,class,enabled,notes
+# api: "latest" = highest Android API installed/available (resolved by scripts/devices/create-avds.sh), or a number
+# profile: avdmanager device id ("-" = AVD already exists, just use it). Check: avdmanager list device
+# enabled: yes|no
+phone-small,maestro_phone_small,pixel_2,latest,small phone (5.0in 1080x1920),yes,smallest common screen
+phone-large,maestro_phone_large,pixel_9_pro_xl,latest,large phone (6.8in),yes,largest common phone
+tablet,maestro_tablet,pixel_tablet,latest,tablet (10.2in 2560x1600),yes,tablet layout
+baseline-phone-api31,Pixel_3a_API_31_arm64-v8a_Mobile_View,-,31,legacy baseline phone,yes,existing emulator; older OS coverage

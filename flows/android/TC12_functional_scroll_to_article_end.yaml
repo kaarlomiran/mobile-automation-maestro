@@ -1,0 +1,18 @@
+# TC12 [functional] Scrolling a long article reaches the end of the page (footer license + browser link).
+appId: ${APP_ID}
+tags: [regression, functional, article]
+---
+- runFlow: ../subflows/start_at_search.yaml
+- runFlow:
+    file: ../../pom/android/pages/search_enter_query.yaml
+    env: { QUERY: "Albert Einstein" }
+- runFlow:
+    file: ../../pom/android/pages/search_open_top_result.yaml
+    env: { RESULT_DESCRIPTION: "German-born theoretical physicist.*" }
+- runFlow:
+    file: ../../pom/android/pages/article_assert_loaded.yaml
+    env: { TAGLINE: "German-born theoretical physicist.*" }
+- assertNotVisible: "Content is available under.*"     # footer is NOT on screen at the top
+- runFlow: ../../pom/android/pages/article_scroll_to_end.yaml
+- assertNotVisible: "German-born theoretical physicist.*"   # lead section scrolled out of view
+- runFlow: ../../pom/android/pages/app_assert_no_crash.yaml

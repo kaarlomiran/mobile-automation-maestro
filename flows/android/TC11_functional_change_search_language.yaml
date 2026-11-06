@@ -1,0 +1,27 @@
+# TC11 [functional][search] Adding Spanish and switching the search tab returns Spanish-language results.
+appId: ${APP_ID}
+tags: [regression, functional, search, language]
+---
+- runFlow: ../subflows/start_at_search.yaml
+- assertVisible: "EN"                                   # default: English only, one language
+- assertNotVisible: "ESPAÑOL"
+- runFlow:
+    file: ../../pom/android/pages/language_add.yaml
+    env: { LANGUAGE: "Español" }
+- assertVisible: "ENGLISH"                              # both tabs offered now
+- assertVisible: "ESPAÑOL"
+- runFlow:
+    file: ../../pom/android/pages/search_enter_query.yaml
+    env: { QUERY: "Albert Einstein" }
+- runFlow:
+    file: ../../pom/android/pages/search_select_language_tab.yaml
+    env: { TAB_LABEL: "ESPAÑOL" }
+- extendedWaitUntil:
+    visible: ".*(físico|alemán|científico).*"          # Spanish description of the article
+    timeout: 20000
+- assertNotVisible: "German-born theoretical physicist.*"   # English result is gone
+- runFlow:
+    file: ../../pom/android/pages/search_select_language_tab.yaml
+    env: { TAB_LABEL: "ENGLISH" }
+- runFlow: ../../pom/android/pages/search_assert_results_for_einstein.yaml   # switching back restores English
+- runFlow: ../../pom/android/pages/app_assert_no_crash.yaml

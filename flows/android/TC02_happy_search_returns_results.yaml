@@ -1,0 +1,16 @@
+# TC02 [happy path][search][smoke] Searching "Albert Einstein" lists the matching article with its description.
+appId: ${APP_ID}
+tags: [smoke, happy, search]
+---
+- runFlow: ../subflows/start_at_search.yaml
+- runFlow:
+    file: ../../pom/android/pages/search_enter_query.yaml
+    env: { QUERY: "Albert Einstein" }
+- runFlow:
+    file: ../../pom/android/pages/search_assert_query_text.yaml
+    env: { QUERY: "Albert Einstein" }
+- runFlow: ../../pom/android/pages/search_assert_results_list.yaml
+- runFlow: ../../pom/android/pages/search_assert_results_for_einstein.yaml
+- assertVisible: "Albert Einstein College of Medicine"   # related result also listed
+- assertNotVisible: "No results"
+- runFlow: ../../pom/android/pages/app_assert_no_crash.yaml

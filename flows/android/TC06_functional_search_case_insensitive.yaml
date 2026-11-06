@@ -1,0 +1,16 @@
+# TC06 [functional][search] Lower-case and upper-case queries return the same top article.
+appId: ${APP_ID}
+tags: [regression, functional, search]
+---
+- runFlow: ../subflows/start_at_search.yaml
+- runFlow:
+    file: ../../pom/android/pages/search_enter_query.yaml
+    env: { QUERY: "albert einstein" }
+- runFlow: ../../pom/android/pages/search_assert_results_list.yaml
+- runFlow: ../../pom/android/pages/search_assert_results_for_einstein.yaml
+- runFlow:
+    file: ../../pom/android/pages/search_enter_query.yaml
+    env: { QUERY: "ALBERT EINSTEIN" }
+- runFlow: ../../pom/android/pages/search_assert_results_list.yaml
+- runFlow: ../../pom/android/pages/search_assert_results_for_einstein.yaml
+- runFlow: ../../pom/android/pages/app_assert_no_crash.yaml

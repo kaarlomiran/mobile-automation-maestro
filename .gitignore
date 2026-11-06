@@ -6,3 +6,5 @@ apps/*
 report-*.xml
 build/
 .maestro/tests/
+pom/
+runs/

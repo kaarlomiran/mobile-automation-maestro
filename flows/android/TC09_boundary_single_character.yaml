@@ -1,0 +1,14 @@
+# TC09 [boundary][search] Minimum length: a single-character query returns suggestions.
+appId: ${APP_ID}
+tags: [regression, boundary, search]
+---
+- runFlow: ../subflows/start_at_search.yaml
+- runFlow:
+    file: ../../pom/android/pages/search_enter_query.yaml
+    env: { QUERY: "a" }
+- runFlow:
+    file: ../../pom/android/pages/search_assert_query_text.yaml
+    env: { QUERY: "a" }
+- runFlow: ../../pom/android/pages/search_assert_results_list.yaml
+- runFlow: ../../pom/android/pages/search_assert_field_alive.yaml
+- runFlow: ../../pom/android/pages/app_assert_no_crash.yaml

@@ -1,0 +1,15 @@
+# TC07 [negative][search] A nonsense query shows the "No results" state.
+appId: ${APP_ID}
+tags: [regression, negative, search]
+---
+- runFlow: ../subflows/start_at_search.yaml
+- runFlow:
+    file: ../../pom/android/pages/search_enter_query.yaml
+    env: { QUERY: "zzqxjkvv" }
+- runFlow: ../../pom/android/pages/search_assert_no_results.yaml
+- runFlow:
+    file: ../../pom/android/pages/search_assert_query_text.yaml
+    env: { QUERY: "zzqxjkvv" }
+- assertNotVisible: "German-born theoretical physicist.*"   # no stale results from other queries
+- assertNotVisible: "Albert Einstein.*"                       # no result rows at all
+- runFlow: ../../pom/android/pages/app_assert_no_crash.yaml
