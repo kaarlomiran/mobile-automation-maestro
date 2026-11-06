@@ -1,0 +1,6 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    { "label": "maestro: android", "type": "shell", "command": "./scripts/run-android.sh", "problemMatcher": [] }
+  ]
+}

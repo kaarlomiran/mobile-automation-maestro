@@ -1,0 +1,8 @@
+apps/*
+!apps/.gitkeep
+*.apk
+*.app/
+*.ipa
+report-*.xml
+build/
+.maestro/tests/
