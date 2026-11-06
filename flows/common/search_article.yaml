@@ -1,0 +1,15 @@
+appId: ${APP_ID}
+tags:
+  - smoke
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    when:
+      visible: "Skip"
+    commands:
+      - tapOn: "Skip"
+- tapOn: "Search Wikipedia"
+- inputText: "Maestro"
+- assertVisible: "Maestro.*"
+- takeScreenshot: search_results
