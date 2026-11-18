@@ -89,6 +89,17 @@ Targets are defined in one file, `config/devices.csv`; add a row to add a device
 `./scripts/run-matrix.sh` runs the whole suite on every enabled device (one shared cycle number), then writes a consolidated
 test-by-device table. See [docs/DEVICE-MATRIX.md](docs/DEVICE-MATRIX.md).
 
+## Weekly CI run
+
+`.github/workflows/weekly-android.yml` runs the full TC01-TC12 suite **every Monday at 03:00 UTC** (and on demand via
+*Actions > Weekly Android suite > Run workflow*). It starts an x86_64 Android 14 (API 34) emulator on a GitHub runner, installs the
+Wikipedia sample APK, fetches the pinned page objects, runs the suite with the same evidence set, summary video and output guard,
+and fails the job if any test fails or the guard reports a variance. The run evidence (`runs/`) is uploaded as a workflow artifact
+(kept 30 days) and the report is shown on the run's summary page.
+
+CI covers one phone emulator as a regression baseline. The small / large / tablet matrix on Android 17 is a local run
+(`./scripts/run-matrix.sh`), because those AVDs are arm64.
+
 ## Quick start
 
 Prerequisites: JDK 17+, Maestro 2.x, Android SDK (command-line tools, emulator, platform-tools), `ffmpeg` (summary video), `gh`,
@@ -133,4 +144,4 @@ Not committed (see `.gitignore`): `runs/` (evidence output), `pom/` (fetched), `
 
 - **iOS** (next): simulator setup, `flows/ios`, iOS page objects in `mobile-pom-maestro/ios`, `scripts/run-ios-report.sh`
   with the same run-folder convention and the same output guard.
-- CI on GitHub Actions (Android job, then iOS on a macOS runner) with branch protection, and Claude PR review.
+- CI: the weekly Android job is in place; next iOS on a macOS runner, branch protection and Claude PR review.
