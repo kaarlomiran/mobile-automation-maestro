@@ -18,7 +18,7 @@ runs/matrix/<date>_<time>_cycle-NN/summary.md                    device x test t
 
 <RUN> = YYYY-MM-DD_HHMMSS_cycle-NN_<android|ios>[_<device-id>]
 ```
-- Date + start time of the run; `cycle-NN` = run cycle counter that **restarts at 01 every date**. All devices of one matrix run share one cycle number, so different cycles never mix.
+- Date = the date the cycle started (a matrix cycle that runs past midnight keeps it) + start time of the run; `cycle-NN` = run cycle counter that **restarts at 01 every date**. All devices of one matrix run share one cycle number, so different cycles never mix.
 - `NN` inside a run = test sequence (01, 02, ...), no gaps. `TCxx_short-title` comes from the flow file name / title.
 - No loose files directly in a category folder; everything lives in a `<RUN>` subfolder.
 

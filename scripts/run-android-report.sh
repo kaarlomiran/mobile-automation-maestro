@@ -7,14 +7,15 @@
 #   runs/video/<RUN>/<RUN>_summary.mp4                           <=60 s narrated summary
 # <RUN> = YYYY-MM-DD_HHMMSS_cycle-NN_<platform>[_<device-id>]   (cycle-NN restarts at 01 every date)
 # Usage: ./scripts/run-android-report.sh [tag-filter e.g. smoke]
-# Env:   DEVICE_SERIAL, DEVICE_ID, DEVICE_CLASS (set by run-matrix.sh), CYCLE_NO (shared by a matrix), NO_VIDEO=1
+# Env:   DEVICE_SERIAL, DEVICE_ID, DEVICE_CLASS, CYCLE_NO, CYCLE_DATE (all set by run-matrix.sh), NO_VIDEO=1
 set -uo pipefail
 cd "$(dirname "$0")/.."
+PY=python3; [[ -x .venv/bin/python ]] && PY=.venv/bin/python   # project venv (pillow) if present: scripts/requirements.txt
 [[ -d pom ]] || ./scripts/sync-pom.sh
 APP_ID=$(grep '^APP_ID=' config/android.env | cut -d= -f2)
 TAG="${1:-}"
 
-RUNS=runs; DATE=$(date +%Y-%m-%d)
+RUNS=runs; DATE="${CYCLE_DATE:-$(date +%Y-%m-%d)}"      # a matrix cycle keeps the date it started on (even past midnight)
 mkdir -p $RUNS/{screenshots,recordings,trace,report,video}
 if [[ -z "${CYCLE_NO:-}" ]]; then
   LAST=$(ls $RUNS/report 2>/dev/null | grep "^${DATE}_" | sed -n 's/.*_cycle-\([0-9]*\)_.*/\1/p' | sort -n | tail -1)
@@ -62,10 +63,10 @@ for f in flows/android/TC*.yaml; do
   sed -n '1s/^# //p' "$f" >> "$REP/.titles.txt"
 done
 
-python3 -I scripts/build_report.py "$RUN_NAME"
-[[ -z "${NO_VIDEO:-}" ]] && python3 -I scripts/make_summary_video.py "$RUN_NAME"
+"$PY" -I scripts/build_report.py "$RUN_NAME"
+[[ -z "${NO_VIDEO:-}" ]] && "$PY" -I scripts/make_summary_video.py "$RUN_NAME"
 # MANDATORY output guard (skill: verify-run-outputs). Never skip.
-python3 -I scripts/verify_run_outputs.py "$RUN_NAME"
+"$PY" -I scripts/verify_run_outputs.py "$RUN_NAME"
 GUARD=$?
 echo "Done: $RUN_NAME  (output check exit=$GUARD; see $REP/output-check.md)"
 exit $GUARD
