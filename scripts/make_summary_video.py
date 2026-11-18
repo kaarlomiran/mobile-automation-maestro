@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Narrated test-summary video (<=60s .mp4) for one run folder: scope, run, risks, issues, summary.
-Needs ffmpeg + macOS `say`. Optional report/findings.json: {"risks":[...], "issues":[...]} overrides the auto text."""
+Needs ffmpeg + a male TTS voice: macOS `say` (Daniel) or, on Linux/CI, `espeak-ng`. Optional report/findings.json: {"risks":[...], "issues":[...]} overrides the auto text."""
 import json, sys, pathlib, subprocess, tempfile, collections
 from PIL import Image, ImageDraw, ImageFont
 root = pathlib.Path(sys.argv[2] if len(sys.argv) > 2 else "runs").resolve(); name = sys.argv[1]
@@ -11,7 +11,9 @@ F = json.loads(fj.read_text()) if fj.exists() else {}
 import os
 VOICE = os.environ.get("NARRATION_VOICE", "Daniel")   # male voice (en_GB)
 W, H = 1280, 720
-FONT = "/System/Library/Fonts/Helvetica.ttc"
+import shutil
+FONT = next((p for p in ("/System/Library/Fonts/Helvetica.ttc", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf") if os.path.exists(p)), None)
+USE_SAY = shutil.which("say") is not None
 f = lambda s: ImageFont.truetype(FONT, s)
 BG, FG, ACC, RED, GRN = (18, 24, 38), (240, 244, 250), (110, 168, 255), (255, 107, 107), (88, 214, 141)
 
@@ -66,7 +68,10 @@ def build(rate):
         d.text((W - 140, H - 50), f"{i+1}/{len(slides)}", font=f(24), fill=(130, 140, 160))
         png, aif, mp4 = tmp / f"s{i}.png", tmp / f"s{i}.aiff", tmp / f"s{i}.mp4"
         img.save(png)
-        subprocess.run(["say", "-v", VOICE, "-r", str(rate), "-o", str(aif), narr], check=True)
+        if USE_SAY:
+            subprocess.run(["say", "-v", VOICE, "-r", str(rate), "-o", str(aif), narr], check=True)
+        else:   # Linux/CI: espeak-ng male voice (-s = words per minute)
+            subprocess.run(["espeak-ng", "-v", "en-us+m3", "-s", str(rate), "-w", str(aif), narr], check=True)
         dur = float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(aif)]).decode()) + 0.5
         subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-loop", "1", "-i", str(png), "-i", str(aif), "-af", "apad", "-t", f"{dur:.2f}",
                         "-c:v", "libx264", "-tune", "stillimage", "-pix_fmt", "yuv420p", "-r", "10", "-c:a", "aac", str(mp4)], check=True)
