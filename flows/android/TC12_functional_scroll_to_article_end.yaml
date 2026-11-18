@@ -1,4 +1,7 @@
 # TC12 [functional] Scrolling a long article reaches the end of the page (footer license + browser link).
+# Swipes cost ~7 s each, so the bottom is reached via swipes + the Contents menu (last section).
+# Finding (cycle 04): on Android 17 off-screen WebView content is in the accessibility tree, so visibility asserts on
+# article content can't prove scrolling; the collapsing toolbar is used as scroll proof instead (see POM page).
 appId: ${APP_ID}
 tags: [regression, functional, article]
 ---
@@ -12,7 +15,7 @@ tags: [regression, functional, article]
 - runFlow:
     file: ../../pom/android/pages/article_assert_loaded.yaml
     env: { TAGLINE: "German-born theoretical physicist.*" }
-- assertNotVisible: "Content is available under.*"     # footer is NOT on screen at the top
-- runFlow: ../../pom/android/pages/article_scroll_to_end.yaml
-- assertNotVisible: "German-born theoretical physicist.*"   # lead section scrolled out of view
+- runFlow:
+    file: ../../pom/android/pages/article_scroll_to_end.yaml
+    env: { LAST_SECTION: "External links" }
 - runFlow: ../../pom/android/pages/app_assert_no_crash.yaml
