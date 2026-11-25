@@ -38,6 +38,9 @@ SCREEN=$(adb -s "$DEVICE" shell wm size | awk -F": " '{print $2}' | tr -d '\r');
 printf '{"platform":"android","cycle":"%s","device_id":"%s","device_class":"%s","avd":"%s","android":"%s","api":"%s","screen":"%s","run_id":"%s","device":"%s","app_id":"%s","app_version":"%s","started":"%s"}\n' \
   "$CYCLE_NO" "${DEVICE_ID:-default}" "${DEVICE_CLASS:-}" "$AVD" "$OS_REL" "$API" "$SCREEN" "$RUN_NAME" "$DEVICE" "$APP_ID" "$APP_VER" "$(date -Iseconds)" > "$REP/run-info.json"
 
+# environment hygiene (logged to report/<RUN>/environment.log): clear system "not responding" dialogs before testing
+./scripts/devices/settle-emulator.sh "$DEVICE" "$APP_ID" 4 | tee -a "$REP/environment.log"
+
 N=0
 for f in flows/android/TC*.yaml; do
   if [[ -n "$TAG" ]] && ! grep -q -E "^tags:.*\b$TAG\b" "$f"; then continue; fi
@@ -46,6 +49,7 @@ for f in flows/android/TC*.yaml; do
   name="${NN}_${tc}_${short}"
   echo "== $name"
 
+  ./scripts/devices/settle-emulator.sh "$DEVICE" "$APP_ID" | tee -a "$REP/environment.log"
   adb -s "$DEVICE" shell rm -f /sdcard/rec.mp4
   adb -s "$DEVICE" shell screenrecord --time-limit 170 /sdcard/rec.mp4 >/dev/null 2>&1 &
   REC=$!; sleep 1; START=$(date +%s)

@@ -23,18 +23,10 @@ while IFS=, read -r id avd profile api class enabled notes <&3; do
     [[ -n "$SER" && "$(adb -s "$SER" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" == "1" ]] && break; sleep 5
   done
   if [[ -z "${SER:-}" ]]; then echo "BOOT FAILED $id"; printf '%s\tBOOT_FAILED\t\n' "$id" >> "$MDIR/runs.tsv"; continue; fi
-  # settle: a just-booted emulator can raise "System UI isn't responding" over the app (seen on large/tablet AVDs)
+  # settle a just-booted emulator; "not responding" dialogs are cleared by run-android-report.sh (devices/settle-emulator.sh)
   adb -s "$SER" shell input keyevent KEYCODE_WAKEUP >/dev/null 2>&1
   for k in window_animation_scale transition_animation_scale animator_duration_scale; do adb -s "$SER" shell settings put global $k 0 >/dev/null 2>&1; done
   sleep 60
-  for i in 1 2 3 4 5 6; do
-    adb -s "$SER" shell uiautomator dump /sdcard/anr.xml >/dev/null 2>&1
-    if adb -s "$SER" shell cat /sdcard/anr.xml 2>/dev/null | grep -q "isn't responding"; then
-      echo "ANR dialog present after boot on $id, choosing Wait"
-      XY=$(adb -s "$SER" shell cat /sdcard/anr.xml | tr '>' '>\n' | grep 'text="Wait"' | grep -o 'bounds="\[[0-9]*,[0-9]*\]\[[0-9]*,[0-9]*\]"' | head -1 | tr -c '0-9\n' ' ' | awk '{print int(($1+$3)/2), int(($2+$4)/2)}')
-      [[ -n "$XY" ]] && adb -s "$SER" shell input tap $XY; sleep 10
-    else break; fi
-  done
   [[ -f apps/android.apk ]] && adb -s "$SER" install -r apps/android.apk >/dev/null 2>&1   # app under test onto the fresh AVD
   OUT=$(DEVICE_SERIAL="$SER" DEVICE_ID="$id" DEVICE_CLASS="$class" ./scripts/run-android-report.sh 2>&1 | tee /dev/stderr)
   RUNDIR=$(echo "$OUT" | sed -n 's/^Run name: //p' | head -1)
