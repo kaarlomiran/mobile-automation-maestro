@@ -1,0 +1,26 @@
+# TC05 [functional][article] Choosing a section in Contents scrolls the article to that section.
+appId: ${APP_ID}
+tags: [regression, functional, article]
+---
+- runFlow: ../subflows/ios_start_on_home.yaml
+- runFlow: ../../pom/ios/pages/nav_go_to_search.yaml
+- runFlow:
+    file: ../../pom/ios/pages/search_enter_query.yaml
+    env: { QUERY: "Albert Einstein" }
+- runFlow:
+    file: ../../pom/ios/pages/search_open_result.yaml
+    env: { TITLE: "Albert Einstein" }
+- runFlow:
+    file: ../../pom/ios/pages/article_assert_loaded.yaml
+    env: { TITLE: "Albert Einstein", DESCRIPTION: "German-born theoretical physicist" }
+- runFlow: ../../pom/ios/pages/article_contents_hide_sidebar.yaml   # iPad only: start with Contents closed
+- runFlow:
+    file: ../../pom/ios/pages/article_assert_section_off_screen.yaml
+    env: { SECTION_TITLE: "Touring South America.*" } # start state: section is far below
+- runFlow:
+    file: ../../pom/ios/pages/article_contents_select.yaml
+    env: { SECTION_ID: "Touring_South_America.*", SECTION_TITLE: "Touring South America.*" }
+- runFlow:
+    file: ../../pom/ios/pages/article_assert_section_off_screen.yaml
+    env: { SECTION_TITLE: "German-born theoretical physicist.*" }   # the top of the page has scrolled away
+- runFlow: ../../pom/ios/pages/app_assert_no_crash.yaml

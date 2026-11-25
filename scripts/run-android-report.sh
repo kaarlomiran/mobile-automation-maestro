@@ -5,6 +5,7 @@
 #   runs/trace/<RUN>/NN_TCxx_short-title/                        Maestro commands, logs, hierarchy, failure shots
 #   runs/report/<RUN>/                                           junit/, results.json, summary.md, run-info.json, output-check.*
 #   runs/video/<RUN>/<RUN>_summary.mp4                           <=60 s narrated summary
+#   runs/issues/<RUN>/NN_TCxx_.._step-SSS_<flow-part>/         one folder per failed test (evidence + issue.md)
 # <RUN> = YYYY-MM-DD_HHMMSS_cycle-NN_<platform>[_<device-id>]   (cycle-NN restarts at 01 every date)
 # Usage: ./scripts/run-android-report.sh [tag-filter e.g. smoke]
 # Env:   DEVICE_SERIAL, DEVICE_ID, DEVICE_CLASS, CYCLE_NO, CYCLE_DATE (all set by run-matrix.sh), NO_VIDEO=1
@@ -16,7 +17,7 @@ APP_ID=$(grep '^APP_ID=' config/android.env | cut -d= -f2)
 TAG="${1:-}"
 
 RUNS=runs; DATE="${CYCLE_DATE:-$(date +%Y-%m-%d)}"      # a matrix cycle keeps the date it started on (even past midnight)
-mkdir -p $RUNS/{screenshots,recordings,trace,report,video}
+mkdir -p $RUNS/{screenshots,recordings,trace,report,video,issues}
 if [[ -z "${CYCLE_NO:-}" ]]; then
   LAST=$(ls $RUNS/report 2>/dev/null | grep "^${DATE}_" | sed -n 's/.*_cycle-\([0-9]*\)_.*/\1/p' | sort -n | tail -1)
   CYCLE_NO=$(printf '%02d' $(( 10#${LAST:-0} + 1 )))
@@ -65,6 +66,7 @@ done
 
 "$PY" -I scripts/build_report.py "$RUN_NAME"
 [[ -z "${NO_VIDEO:-}" ]] && "$PY" -I scripts/make_summary_video.py "$RUN_NAME"
+"$PY" -I scripts/collect_issues.py "$RUN_NAME"     # one folder per failed test, with the failing step
 # MANDATORY output guard (skill: verify-run-outputs). Never skip.
 "$PY" -I scripts/verify_run_outputs.py "$RUN_NAME"
 GUARD=$?

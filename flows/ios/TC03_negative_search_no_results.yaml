@@ -1,0 +1,13 @@
+# TC03 [negative][search] A nonsense query shows "No results found" after submit and lists no results.
+appId: ${APP_ID}
+tags: [regression, negative, search]
+---
+- runFlow: ../subflows/ios_start_on_home.yaml
+- runFlow: ../../pom/ios/pages/nav_go_to_search.yaml
+- assertNotVisible: "No results found"                # start state
+- runFlow:
+    file: ../../pom/ios/pages/search_enter_query.yaml
+    env: { QUERY: "zzqxjvkwq9871" }
+- runFlow: ../../pom/ios/pages/search_submit.yaml
+- runFlow: ../../pom/ios/pages/search_assert_no_results.yaml
+- runFlow: ../../pom/ios/pages/app_assert_no_crash.yaml
