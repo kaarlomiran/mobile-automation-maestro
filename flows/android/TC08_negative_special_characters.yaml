@@ -1,4 +1,4 @@
-# TC08 [negative][search] Markup / injection-like input is handled safely: no crash, no results, input echoed as text.
+# TC08 [negative][search] Markup / injection-like input is handled safely: no crash, input echoed as plain text.
 appId: ${APP_ID}
 tags: [regression, negative, search]
 ---

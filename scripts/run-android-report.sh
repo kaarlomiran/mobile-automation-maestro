@@ -39,7 +39,7 @@ printf '{"platform":"android","cycle":"%s","device_id":"%s","device_class":"%s",
   "$CYCLE_NO" "${DEVICE_ID:-default}" "${DEVICE_CLASS:-}" "$AVD" "$OS_REL" "$API" "$SCREEN" "$RUN_NAME" "$DEVICE" "$APP_ID" "$APP_VER" "$(date -Iseconds)" > "$REP/run-info.json"
 
 # environment hygiene (logged to report/<RUN>/environment.log): clear system "not responding" dialogs before testing
-./scripts/devices/settle-emulator.sh "$DEVICE" "$APP_ID" 4 | tee -a "$REP/environment.log"
+./scripts/devices/settle-emulator.sh "$DEVICE" "$APP_ID" 4 | sed "s/^/suite-start\t/" | tee -a "$REP/environment.log"
 
 N=0
 for f in flows/android/TC*.yaml; do
@@ -49,13 +49,15 @@ for f in flows/android/TC*.yaml; do
   name="${NN}_${tc}_${short}"
   echo "== $name"
 
-  ./scripts/devices/settle-emulator.sh "$DEVICE" "$APP_ID" | tee -a "$REP/environment.log"
+  ./scripts/devices/settle-emulator.sh "$DEVICE" "$APP_ID" | sed "s/^/$name\t/" | tee -a "$REP/environment.log"
+  "$PY" -I scripts/host_metrics.py "$REP/host-metrics.tsv" "$name:before"
   adb -s "$DEVICE" shell rm -f /sdcard/rec.mp4
   adb -s "$DEVICE" shell screenrecord --time-limit 170 /sdcard/rec.mp4 >/dev/null 2>&1 &
   REC=$!; sleep 1; START=$(date +%s)
   maestro test --udid "$DEVICE" -e APP_ID="$APP_ID" --format=junit --output="$REP/junit/$name.xml" \
     --debug-output="$TRACE/$name" --flatten-debug-output "$f" > "$TRACE/$name.log" 2>&1
   RC=$?; DUR=$(( $(date +%s) - START ))
+  "$PY" -I scripts/host_metrics.py "$REP/host-metrics.tsv" "$name:after"
   RESULT=PASS; [[ $RC -ne 0 ]] && RESULT=FAIL
 
   adb -s "$DEVICE" exec-out screencap -p > "$SHOTS/${name}_${RESULT}.png"
@@ -71,6 +73,7 @@ done
 "$PY" -I scripts/build_report.py "$RUN_NAME"
 [[ -z "${NO_VIDEO:-}" ]] && "$PY" -I scripts/make_summary_video.py "$RUN_NAME"
 "$PY" -I scripts/collect_issues.py "$RUN_NAME"     # one folder per failed test, with the failing step
+"$PY" -I scripts/triage_issues.py "$RUN_NAME"      # label machine-suspect failures (results are never changed)
 # MANDATORY output guard (skill: verify-run-outputs). Never skip.
 "$PY" -I scripts/verify_run_outputs.py "$RUN_NAME"
 GUARD=$?
