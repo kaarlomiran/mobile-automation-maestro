@@ -78,7 +78,7 @@ jobs:
         run: |
           for r in runs/report/*/; do
             echo "### $(basename "$r")" >> "$GITHUB_STEP_SUMMARY"
-            cat "$r/summary.md" "$r/output-check.md" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+            cat "$r/summary.md" "$r/output-check.md" "runs/issues/$(basename "$r")/triage.md" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
           done
 
       - name: Fail the job if any test failed
