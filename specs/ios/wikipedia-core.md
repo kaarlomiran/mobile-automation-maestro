@@ -117,6 +117,7 @@ All five scenarios: **GENERATED, PASSING** (verified 2026-11-25, iPhone 18 Pro s
 
 **iPad** (iPad Pro 11-inch (M5), iOS 27.2), run `2026-11-25_223007_cycle-06_ios_ipad-pro-11`: **3/5**. TC-01 to TC-03 pass; TC-04 and TC-05 fail
 (docs/KNOWN-ISSUES.md IOS-01 to IOS-03). A later iPhone run, `2026-11-25_215741_cycle-05_ios_iphone-18-pro`, also passed 5/5;
-the Contents page objects changed afterwards for the iPad sidebar.
+the Contents page objects changed afterwards for the iPad sidebar. TC-05 passed once on the iPhone with the changed page objects
+(single check without evidence recording, not a recorded run).
 
 One iPhone and one iPad have been covered. Two consecutive passes do not show that TC-01 can never hit observation 2.
