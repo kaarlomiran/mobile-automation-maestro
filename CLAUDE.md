@@ -22,8 +22,9 @@ Maestro flows for native Android and iOS apps. Maestro runs decide pass/fail; ne
 - Test data via -e variables; no credentials in YAML.
 
 ## Run outputs (mandatory)
-- Runs: ./scripts/run-android-report.sh (one device) or ./scripts/run-matrix.sh (all devices in config/devices.csv); iOS later: run-ios-report.sh.
-- Outputs: one folder per run inside each of runs/{screenshots,recordings,trace,report,video}/, named <YYYY-MM-DD_HHMMSS>_cycle-<NN>_<platform>[_<device>] (cycle restarts each date).
+- Runs: ./scripts/run-android-report.sh (one device) or ./scripts/run-matrix.sh (all devices in config/devices.csv); iOS: run-ios-report.sh.
+- Outputs: one folder per run inside each of runs/{screenshots,recordings,trace,report,video,issues}/, named <YYYY-MM-DD_HHMMSS>_cycle-<NN>_<platform>[_<device>] (cycle restarts each date).
+- Failures: runs/issues/<RUN>/NN_TCxx_short-title_step-SSS_<flow-part>/ (scripts/collect_issues.py), both platforms.
 - After EVERY run on EITHER platform and every device, invoke the verify-run-outputs skill (.claude/skills/verify-run-outputs) and report its variances. Never skip.
 - Devices: config/devices.csv (small phone, large phone, tablet on latest Android + API 31 baseline). See docs/DEVICE-MATRIX.md.
 - POM: page objects live in the separate repo mobile-pom-maestro, fetched into ./pom by scripts/sync-pom.sh (pinned in pom.lock). Selectors go there only.

@@ -14,6 +14,8 @@ runs/recordings/<RUN>/    NN_TCxx_short-title.mp4
 runs/trace/<RUN>/         NN_TCxx_short-title/  (+ NN_..log)    Maestro commands, logs, hierarchy, failure shots
 runs/report/<RUN>/        junit/, results.json, summary.md, run-info.json, output-check.md|json
 runs/video/<RUN>/         <RUN>_summary.mp4   (<= 60 s narrated summary)
+runs/issues/<RUN>/        index.md, issues.json, NN_TCxx_short-title_step-SSS_<flow-part>/ per failed test,
+                          00_output-check_variances/ when the guard finds variances
 runs/matrix/<date>_<time>_cycle-NN/summary.md                    device x test table (matrix runs)
 
 <RUN> = YYYY-MM-DD_HHMMSS_cycle-NN_<android|ios>[_<device-id>]
@@ -27,7 +29,8 @@ runs/matrix/<date>_<time>_cycle-NN/summary.md                    device x test t
 2. Always (re)run the guard yourself for every run just produced and read the result:
    `python3 -I scripts/verify_run_outputs.py <RUN>`
 3. Read `runs/report/<RUN>/output-check.md`. Exit code 0 = all outputs present; 1 = variances.
-4. Report to the user, never silently skipping: the run name(s), pass/fail counts, device and OS, and every variance flagged :warning:
+4. For every failed test open `runs/issues/<RUN>/index.md` and report test case, step, part of the flow and failed command.
+   (Missing folder: `python3 -I scripts/collect_issues.py <RUN>`.) Then report to the user, never silently skipping: the run name(s), pass/fail counts, device and OS, and every variance flagged :warning:
    (missing/empty screenshot, recording, trace or report; naming, sequence or cycle-number breaks; failed test without failure screenshot; loose files; video missing or over 60 s).
 5. Do not fix variances by renaming or fabricating files. Fix the cause (script/device), rerun, and say which run is authoritative.
 6. The user reviews outputs themselves: end with the run name(s), folder paths and the variance list (or "no variances").
