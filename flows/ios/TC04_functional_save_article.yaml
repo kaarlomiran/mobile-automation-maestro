@@ -1,0 +1,27 @@
+# TC04 [functional][saved] Saving an article marks it saved and lists it on the Saved tab.
+appId: ${APP_ID}
+tags: [regression, functional, saved]
+---
+- runFlow: ../subflows/ios_start_on_home.yaml
+- runFlow: ../../pom/ios/pages/nav_go_to_saved.yaml
+- runFlow:
+    file: ../../pom/ios/pages/saved_assert_empty_of.yaml
+    env: { TITLE: "Albert Einstein" }                 # start state: not saved yet
+- runFlow: ../../pom/ios/pages/nav_go_to_search.yaml
+- runFlow:
+    file: ../../pom/ios/pages/search_enter_query.yaml
+    env: { QUERY: "Albert Einstein" }
+- runFlow:
+    file: ../../pom/ios/pages/search_open_result.yaml
+    env: { TITLE: "Albert Einstein" }
+- runFlow:
+    file: ../../pom/ios/pages/article_assert_loaded.yaml
+    env: { TITLE: "Albert Einstein", DESCRIPTION: "German-born theoretical physicist" }
+- runFlow: ../../pom/ios/pages/article_save.yaml
+- runFlow: ../../pom/ios/pages/article_close.yaml
+- runFlow: ../../pom/ios/pages/search_close.yaml
+- runFlow: ../../pom/ios/pages/nav_go_to_saved.yaml
+- runFlow:
+    file: ../../pom/ios/pages/saved_assert_contains.yaml
+    env: { TITLE: "Albert Einstein", DESCRIPTION: "German-born theoretical physicist" }
+- runFlow: ../../pom/ios/pages/app_assert_no_crash.yaml

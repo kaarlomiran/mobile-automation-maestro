@@ -1,0 +1,20 @@
+# TC02 [happy path][search][smoke] Search for an article and open it from the results.
+appId: ${APP_ID}
+tags: [smoke, happy, search]
+---
+- runFlow: ../subflows/ios_start_on_home.yaml
+- runFlow: ../../pom/ios/pages/nav_go_to_search.yaml
+- assertVisible: "No history to show"                 # clean start state
+- runFlow:
+    file: ../../pom/ios/pages/search_enter_query.yaml
+    env: { QUERY: "Albert Einstein" }
+- runFlow:
+    file: ../../pom/ios/pages/search_assert_result.yaml
+    env: { TITLE: "Albert Einstein", DESCRIPTION: "German-born theoretical physicist" }
+- runFlow:
+    file: ../../pom/ios/pages/search_open_result.yaml
+    env: { TITLE: "Albert Einstein" }
+- runFlow:
+    file: ../../pom/ios/pages/article_assert_loaded.yaml
+    env: { TITLE: "Albert Einstein", DESCRIPTION: "German-born theoretical physicist" }
+- runFlow: ../../pom/ios/pages/app_assert_no_crash.yaml

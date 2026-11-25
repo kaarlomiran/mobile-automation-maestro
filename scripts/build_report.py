@@ -14,8 +14,9 @@ passed = sum(t["result"] == "PASS" for t in tests)
 res = dict(info, total=len(tests), passed=passed, failed=len(tests) - passed,
            seconds=sum(t["seconds"] for t in tests), tests=tests)
 (rep / "results.json").write_text(json.dumps(res, indent=2))
+osline = f"iOS {info.get('ios','?')} ({info.get('simulator','')})" if info["platform"] == "ios" else f"Android {info.get('android','?')} (API {info.get('api','?')})"
 md = [f"# Test run {info['run_id']}", "",
-      f"- Platform: {info['platform']} | Device: {info.get('device_id','')} ({info['device']}, {info.get('device_class','')}) | Android {info.get('android','?')} (API {info.get('api','?')}) | Screen {info.get('screen','?')} | App: {info['app_id']} {info['app_version']}",
+      f"- Platform: {info['platform']} | Device: {info.get('device_id','')} ({info['device']}, {info.get('device_class','')}) | {osline} | Screen {info.get('screen','?')} | App: {info['app_id']} {info['app_version']}",
       f"- Result: **{passed}/{len(tests)} passed**, {res['failed']} failed, {res['seconds']}s total", "",
       "| # | Test | Result | Time | Tags | Note |", "|---|---|---|---|---|---|"]
 for t in tests:

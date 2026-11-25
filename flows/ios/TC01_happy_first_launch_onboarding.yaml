@@ -1,0 +1,12 @@
+# TC01 [happy path][smoke] Fresh install: onboarding pages appear in order; after Skip the app opens on Home.
+appId: ${APP_ID}
+tags: [smoke, happy, functional]
+---
+- launchApp:
+    clearState: true
+- runFlow: ../../pom/ios/pages/onboarding_assert_first_launch.yaml
+- assertNotVisible:
+    id: "Root Tab .* Button"
+- runFlow: ../../pom/ios/pages/onboarding_complete.yaml
+- runFlow: ../../pom/ios/pages/home_assert_loaded.yaml
+- runFlow: ../../pom/ios/pages/app_assert_no_crash.yaml
