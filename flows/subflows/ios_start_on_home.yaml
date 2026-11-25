@@ -1,0 +1,5 @@
+# iOS shared setup: fresh app state -> Home, with onboarding skipped by the app's own UI-test launch argument
+# (the same switch the app's XCUITests use). Onboarding itself is covered by TC01.
+appId: ${APP_ID}
+---
+- runFlow: ../../pom/ios/pages/app_launch_skipping_onboarding.yaml

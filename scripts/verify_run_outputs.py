@@ -2,11 +2,11 @@
 """Output guard for one test run (Android or iOS). Exit 0 = all outputs present and conventional; 1 = variances.
 Usage: verify_run_outputs.py <RUN_NAME> [runs_root=runs]
 Layout checked (one folder per run inside EACH category):
-  runs/{screenshots,recordings,trace,report,video}/<YYYY-MM-DD_HHMMSS_cycle-NN_<platform>[_<device>]>/
+  runs/{screenshots,recordings,trace,report,video,issues}/<YYYY-MM-DD_HHMMSS_cycle-NN_<platform>[_<device>]>/
 Writes report/<RUN>/output-check.md + .json so a human can review variances."""
 import json, re, sys, pathlib, subprocess
 name = sys.argv[1]; root = pathlib.Path(sys.argv[2] if len(sys.argv) > 2 else "runs").resolve()
-CATS = ("screenshots", "recordings", "trace", "report", "video")
+CATS = ("screenshots", "recordings", "trace", "report", "video", "issues")
 d = {c: root / c / name for c in CATS}
 issues, ok = [], []
 def bad(m): issues.append(m)
@@ -28,6 +28,7 @@ if rj.exists(): tests = json.loads(rj.read_text())["tests"]; good("report/result
 else: bad("report/results.json MISSING")
 if not tests: bad("no test results recorded (nothing ran?)")
 
+ne_file = lambda p: p.exists() and p.stat().st_size > 0
 pat = re.compile(r"\d{2}_TC\d{2}_[a-z0-9][a-z0-9-]*")
 ne = lambda p: p.exists() and p.stat().st_size > 0
 for i, t in enumerate(tests, 1):
@@ -48,6 +49,13 @@ for c in ("screenshots", "recordings"):
 for c in CATS:
     for p in (root / c).glob("*") if (root / c).is_dir() else []:
         if p.is_file(): bad(f"{c}/{p.name}: loose file outside a run folder (runs would mix)")
+# every failed test needs its own issue folder (built by collect_issues.py)
+if d["issues"].is_dir():
+    (good if ne_file(d["issues"] / "index.md") else bad)("issues/index.md " + ("ok" if ne_file(d["issues"] / "index.md") else "MISSING"))
+    for t in tests:
+        if t["result"] != "FAIL": continue
+        found = [p for p in d["issues"].glob(f"{t['name']}_step-*") if ne_file(p / "issue.md")]
+        (good if found else bad)(f"{t['name']}: issue folder " + (f"ok ({found[0].name})" if found else "MISSING"))
 vids = list(d["video"].glob("*.mp4")) if d["video"].is_dir() else []
 if vids:
     try:
@@ -56,6 +64,13 @@ if vids:
     except Exception as e: bad(f"summary video not readable: {e}")
 else: bad("summary video MISSING (video/<RUN>/*.mp4)")
 
+# record the guard's own variances next to the test failures so all detected issues sit in one place
+vd = d["issues"] / "00_output-check_variances"
+if issues:
+    vd.mkdir(parents=True, exist_ok=True)
+    (vd / "issue.md").write_text(f"# Output check variances for {name}\n\n" + "".join(f"- {m}\n" for m in issues))
+elif vd.is_dir():
+    (vd / "issue.md").unlink(missing_ok=True); vd.rmdir()
 d["report"].mkdir(parents=True, exist_ok=True)
 (d["report"] / "output-check.json").write_text(json.dumps(dict(run=name, ok=len(ok), variances=issues, passed_checks=ok), indent=2))
 md = [f"# Output check: {name}", "", f"**{'PASS' if not issues else 'VARIANCES FOUND'}**: {len(ok)} checks ok, {len(issues)} variance(s)", ""]

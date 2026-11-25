@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Narrated test-summary video (<=60s .mp4) for one run folder: scope, run, risks, issues, summary.
-Needs ffmpeg + macOS `say`. Optional report/findings.json: {"risks":[...], "issues":[...]} overrides the auto text."""
+Needs ffmpeg + a male TTS voice: macOS `say` (Daniel) or, on Linux/CI, `espeak-ng`. Optional report/findings.json: {"risks":[...], "issues":[...]} overrides the auto text."""
 import json, sys, pathlib, subprocess, tempfile, collections
 from PIL import Image, ImageDraw, ImageFont
 root = pathlib.Path(sys.argv[2] if len(sys.argv) > 2 else "runs").resolve(); name = sys.argv[1]
@@ -11,27 +11,34 @@ F = json.loads(fj.read_text()) if fj.exists() else {}
 import os
 VOICE = os.environ.get("NARRATION_VOICE", "Daniel")   # male voice (en_GB)
 W, H = 1280, 720
-FONT = "/System/Library/Fonts/Helvetica.ttc"
+import shutil
+FONT = next((p for p in ("/System/Library/Fonts/Helvetica.ttc", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf") if os.path.exists(p)), None)
+USE_SAY = shutil.which("say") is not None
 f = lambda s: ImageFont.truetype(FONT, s)
 BG, FG, ACC, RED, GRN = (18, 24, 38), (240, 244, 250), (110, 168, 255), (255, 107, 107), (88, 214, 141)
 
+IOS = R["platform"] == "ios"
+OSNAME = f"iOS {R.get('ios','?')}" if IOS else f"Android {R.get('android','?')}"
+EMU = "simulator" if IOS else "emulator"
 tests = R["tests"]; failed = [t for t in tests if t["result"] == "FAIL"]
 cats = collections.Counter(c for t in tests for c in t["tags"] if c not in ("smoke", "regression"))
 mins, secs = divmod(R["seconds"], 60)
 risks = F.get("risks") or ["Live Wikipedia content can change",
                            "Pop-ups such as feature intros can block flows",
                            f"Results apply to {R.get('device_id',R['device'])} only; see device matrix for others"]
-issues = F.get("issues") or ([f"{t['tc']}: {t['reason'] or 'failed'}" for t in failed] or ["No failures"])
+auto = [f"{t['tc']}: {t['short'].replace('-', ' ')} failed" for t in failed]
+if len(auto) > 3: auto = auto[:3] + [f"and {len(failed) - 3} more, see the report"]     # keeps the video within 60 s
+issues = F.get("issues") or auto or ["No failures"]
 verdict = "PASS" if not failed else "FAIL"
 
 slides = []  # (title, bullets, narration, thumbs)
-slides.append(("Test run summary", [R["run_id"], f"{R['platform'].title()} app {R['app_id']} {R['app_version']}"],
+slides.append(("Test run summary", [R["run_id"], f"{'iOS' if IOS else 'Android'} app {R['app_id']} {R['app_version']}"],
                f"Test summary for {R['run_id'].split('_')[2].replace('-',' ')}, {R['platform']} app {R['app_id'].split('.')[-1]}.", []))
 cov = ", ".join(f"{n} {c}" for c, n in cats.most_common())
-slides.append(("What was covered", [f"{R['total']} test cases", f"Categories: {cov}", "Onboarding, search, article, navigation"],
-               f"We covered {R['total']} test cases: {cov}. Scope spans onboarding, search, opening articles, and navigation.", []))
-slides.append(("What was run", [f"Device: {R.get('device_id',R['device'])}, Android {R.get('android','?')}", f"Duration: {mins} min {secs} s", f"Passed {R['passed']} of {R['total']}"],
-               f"The suite ran on the {R.get('device_id','emulator').replace('-',' ')} emulator, Android {R.get('android','')}, in {mins} minutes {secs} seconds. {R['passed']} of {R['total']} passed.", []))
+slides.append(("What was covered", [f"{R['total']} test cases", f"Categories: {cov}", "Areas: " + ", ".join(sorted({t["tc"] for t in tests}))],
+               f"We covered {R['total']} test cases: {cov}. See the report for the scope of each test case.", []))
+slides.append(("What was run", [f"Device: {R.get('device_id',R['device'])}, {OSNAME}", f"Duration: {mins} min {secs} s", f"Passed {R['passed']} of {R['total']}"],
+               f"The suite ran on the {R.get('device_id',EMU).replace('-',' ')} {EMU}, {OSNAME}, in {mins} minutes {secs} seconds. {R['passed']} of {R['total']} passed.", []))
 slides.append(("Risks", risks, "Main risks. " + ". ".join(risks) + ".", []))
 thumbs = [root / "screenshots" / name / f"{t['name']}_{t['result']}.png" for t in failed][:3]
 slides.append(("Issues found", issues,
@@ -66,7 +73,10 @@ def build(rate):
         d.text((W - 140, H - 50), f"{i+1}/{len(slides)}", font=f(24), fill=(130, 140, 160))
         png, aif, mp4 = tmp / f"s{i}.png", tmp / f"s{i}.aiff", tmp / f"s{i}.mp4"
         img.save(png)
-        subprocess.run(["say", "-v", VOICE, "-r", str(rate), "-o", str(aif), narr], check=True)
+        if USE_SAY:
+            subprocess.run(["say", "-v", VOICE, "-r", str(rate), "-o", str(aif), narr], check=True)
+        else:   # Linux/CI: espeak-ng male voice (-s = words per minute)
+            subprocess.run(["espeak-ng", "-v", "en-us+m3", "-s", str(rate), "-w", str(aif), narr], check=True)
         dur = float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(aif)]).decode()) + 0.5
         subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-loop", "1", "-i", str(png), "-i", str(aif), "-af", "apad", "-t", f"{dur:.2f}",
                         "-c:v", "libx264", "-tune", "stillimage", "-pix_fmt", "yuv420p", "-r", "10", "-c:a", "aac", str(mp4)], check=True)
