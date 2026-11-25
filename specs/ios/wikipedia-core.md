@@ -1,6 +1,7 @@
 # Wikipedia iOS core test plan
 
-source: tickets/ios-wikipedia-test-scope.md
+source: tickets/ios/wikipedia-core.md
+source-sha: 4924a4f07275
 
 ## Application overview
 
@@ -16,9 +17,11 @@ iPhone 17 Pro (iOS 26.5). Every id below was seen on the running app. Selectors 
 
 ## Observations (read before changing a test)
 
-1. **Screen goes blank to the driver after onboarding.** After **Skip**, the same Maestro session kept returning an
-   empty hierarchy (waited 150 s) although Home was on screen. A new session or an app relaunch sees it. Backgrounding
-   alone did not help. Likely a test-driver limitation; not confirmed either way. It has not been checked with VoiceOver.
+1. **Tab bar ids missing right after onboarding.** After **Skip**, the same Maestro session shows Home and the tab bar,
+   but the tab bar buttons are reported **without** their `Root Tab …` ids, so id assertions fail (all five failure trees of
+   run `2026-11-25_203635_cycle-01_ios_iphone-18-pro`). A new session or an app relaunch reports the ids. Whether the app
+   or the test driver causes this is not determined. *(Corrected 2026-11-26: an earlier version said the screen was blank;
+   it was not.)* The page object relaunches the app; matching the tab labels instead may make that unnecessary.
 2. **Onboarding completion is not saved the instant Skip is tapped.** Stopping the app a few seconds after Skip showed
    onboarding again in two of five tests (run `2026-11-25_205828_cycle-02_ios_iphone-18-pro`, TC04 and TC05). Sending
    the app to the background before stopping it avoided this in the runs since. Worth raising with the app team.
@@ -39,6 +42,7 @@ iPhone 17 Pro (iOS 26.5). Every id below was seen on the running app. Selectors 
 ### 1. Core journeys
 
 #### 1.1 first-launch-onboarding  (TC-01)
+**Status:** GENERATED, PASSING on iPhone and iPad (verified 2026-11-25).  
 **File:** `flows/ios/TC01_happy_first_launch_onboarding.yaml`
 **Priority:** P0   **Tags:** smoke, happy, functional
 **Preconditions:** fresh install state.
@@ -53,6 +57,7 @@ iPhone 17 Pro (iOS 26.5). Every id below was seen on the running app. Selectors 
 appears immediately after Skip. The feed content is not asserted.
 
 #### 1.2 search-open-article  (TC-02)
+**Status:** GENERATED, PASSING on iPhone and iPad (verified 2026-11-25).  
 **File:** `flows/ios/TC02_happy_search_open_article.yaml`
 **Priority:** P0   **Tags:** smoke, happy, search
 **Steps:**
@@ -64,6 +69,7 @@ appears immediately after Skip. The feed content is not asserted.
      - expect: title and description, `Article Table of Contents Button`, `Article Languages Button`, `Article Save Button`, `Article Find In Page Button`
 
 #### 1.3 search-no-results  (TC-03)
+**Status:** GENERATED, PASSING on iPhone and iPad (verified 2026-11-25).  
 **File:** `flows/ios/TC03_negative_search_no_results.yaml`
 **Priority:** P1   **Tags:** regression, negative, search
 **Steps:**
@@ -73,6 +79,7 @@ appears immediately after Skip. The feed content is not asserted.
      - expect: "No results found"; no `Search Result .*`; app still running
 
 #### 1.4 save-article  (TC-04)
+**Status:** GENERATED, PASSING on iPhone; FAILING on iPad (IOS-01, IOS-02) (verified 2026-11-25).  
 **File:** `flows/ios/TC04_functional_save_article.yaml`
 **Priority:** P1   **Tags:** regression, functional, saved
 **Steps:**
@@ -84,6 +91,7 @@ appears immediately after Skip. The feed content is not asserted.
      - expect: `Saved All Articles Row Albert Einstein` with its description
 
 #### 1.5 contents-jump-to-section  (TC-05)
+**Status:** GENERATED, PASSING on iPhone; FAILING on iPad (IOS-03) (verified 2026-11-25).  
 **File:** `flows/ios/TC05_functional_contents_jump_to_section.yaml`
 **Priority:** P2   **Tags:** regression, functional, article
 **Steps:**

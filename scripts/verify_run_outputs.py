@@ -56,6 +56,11 @@ if d["issues"].is_dir():
         if t["result"] != "FAIL": continue
         found = [p for p in d["issues"].glob(f"{t['name']}_step-*") if ne_file(p / "issue.md")]
         (good if found else bad)(f"{t['name']}: issue folder " + (f"ok ({found[0].name})" if found else "MISSING"))
+    if any(t["result"] == "FAIL" for t in tests):   # every failure must also be triaged
+        tj = d["issues"] / "triage.json"
+        done = {x["test"] for x in json.loads(tj.read_text())["failures"]} if tj.exists() else set()
+        missing = [t["name"] for t in tests if t["result"] == "FAIL" and t["name"] not in done]
+        (bad if missing else good)("issues/triage.json " + (f"MISSING entries for {', '.join(missing)}" if missing else "ok"))
 vids = list(d["video"].glob("*.mp4")) if d["video"].is_dir() else []
 if vids:
     try:

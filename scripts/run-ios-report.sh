@@ -57,10 +57,12 @@ for f in flows/ios/TC*.yaml; do
   REC=$!
   xcrun simctl spawn "$DEVICE" log stream --style compact --predicate 'process == "Wikipedia"' > "$TRACE/$name/app.log" 2>/dev/null &
   LOG=$!
+  "$PY" -I scripts/host_metrics.py "$REP/host-metrics.tsv" "$name:before"
   sleep 1; START=$(date +%s); touch "$TRACE/$name/.start"
   maestro --udid "$DEVICE" test -e APP_ID="$APP_ID" --format=junit --output="$REP/junit/$name.xml" \
     --debug-output="$TRACE/$name" --flatten-debug-output "$f" > "$TRACE/$name.log" 2>&1
   RC=$?; DUR=$(( $(date +%s) - START ))
+  "$PY" -I scripts/host_metrics.py "$REP/host-metrics.tsv" "$name:after"
   RESULT=PASS; [[ $RC -ne 0 ]] && RESULT=FAIL
 
   xcrun simctl io "$DEVICE" screenshot "$SHOTS/${name}_${RESULT}.png" >/dev/null 2>&1
@@ -83,6 +85,7 @@ done
 "$PY" -I scripts/build_report.py "$RUN_NAME"
 [[ -z "${NO_VIDEO:-}" ]] && "$PY" -I scripts/make_summary_video.py "$RUN_NAME"
 "$PY" -I scripts/collect_issues.py "$RUN_NAME"     # one folder per failed test, with the failing step
+"$PY" -I scripts/triage_issues.py "$RUN_NAME"      # label machine-suspect failures (results are never changed)
 # MANDATORY output guard (skill: verify-run-outputs). Never skip.
 "$PY" -I scripts/verify_run_outputs.py "$RUN_NAME"
 GUARD=$?

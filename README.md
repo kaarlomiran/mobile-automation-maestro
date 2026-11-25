@@ -60,8 +60,7 @@ App under test: **Wikipedia for iOS** (`org.wikimedia.wikipedia`), a simulator D
 | TC04 | Functional | Saving an article lists it on the Saved tab |
 | TC05 | Functional, article | Choosing a section in Contents scrolls to it |
 
-Workflow: **test scope** (`tickets/ios-wikipedia-test-scope.md`) -> **test plan** from the live app
-(`specs/ios/wikipedia-core.md`, prompt in `prompts/ios-planner.md`) -> **automation** (`prompts/ios-generator.md`).
+Workflow: see [From ticket to automation](#from-ticket-to-automation).
 
 ```bash
 ./scripts/sync-pom.sh
@@ -70,6 +69,27 @@ xcrun simctl boot "<simulator udid>"
 ```
 
 Open defects and limitations: [docs/KNOWN-ISSUES.md](docs/KNOWN-ISSUES.md). The iPhone passes 5/5; the iPad passes TC01-TC03 only.
+
+## From ticket to automation
+
+Your only input is a ticket. Android and iOS are kept apart at every step:
+
+| Step | Android | iOS |
+|---|---|---|
+| 1. You add acceptance criteria | `tickets/android/` | `tickets/ios/` |
+| 2. Paste the pipeline prompt | [docs/prompts/android/pipeline.md](docs/prompts/android/pipeline.md) | [docs/prompts/ios/pipeline.md](docs/prompts/ios/pipeline.md) |
+| 3. Test plan (from the live app) | `specs/android/` | `specs/ios/` |
+| 4. Automation | `flows/android/` + POM `android/pages` | `flows/ios/` + POM `ios/pages` |
+
+`python3 scripts/ticket_status.py` shows each ticket as NEW, CHANGED, TO_GENERATE or DONE, newest first.
+Templates: `tickets/<platform>/_TEMPLATE.md`. All prompts: [docs/prompts](docs/prompts/README.md).
+
+## Machine-related failures
+
+Every failure is reported. The `triage-machine-failures` skill (`scripts/triage_issues.py`, run automatically) also
+labels each one as app defect suspected, machine suspect, possibly machine, or needs review, with the evidence
+(system "not responding" dialogs, device timeouts, blank screen tree, host load and memory recorded per test) in
+`runs/issues/<RUN>/triage.md`. A label never changes a result.
 
 ## Page Object Model (POM)
 
@@ -148,12 +168,14 @@ The app under test is installed from `apps/android.apk` (not committed; use the 
 flows/android/      TC01..TC12 test flows (tagged smoke / regression / happy / negative / boundary / search / functional)
 flows/subflows/     shared test setup (fresh start -> search focused)
 flows/ios/          iOS flows TC01..TC05
-tickets/ specs/ prompts/   test scope, test plans, planner and generator prompts
+tickets/<platform>/  your input: acceptance criteria
+specs/<platform>/    test plans written from tickets
+docs/prompts/<platform>/  pipeline, planner, generator, heal prompts
 config/             android.env, ios.env (app ids), devices.csv (Android device matrix)
 scripts/            requirements.txt, run-android-report.sh, run-matrix.sh, sync-pom.sh, build_report.py, make_summary_video.py,
                     verify_run_outputs.py, matrix_report.py, devices/create-avds.sh
-.claude/skills/     verify-run-outputs (mandatory output guard)
-docs/               DEVICE-MATRIX.md
+.claude/skills/     verify-run-outputs (mandatory output guard), triage-machine-failures
+docs/               DEVICE-MATRIX.md, KNOWN-ISSUES.md, prompts/
 CLAUDE.md           rules for Claude (flow style, mandatory output check, POM rule, assertion rule)
 ```
 
