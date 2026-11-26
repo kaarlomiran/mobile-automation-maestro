@@ -28,35 +28,35 @@ local run. The CI baseline (Android 14) passed 12/12 on 2026-11-25 (UTC), GitHub
 **File:** `flows/android/TC01_happy_launch_and_onboarding.yaml`  
 **Tags:** smoke, happy, functional  
 **Purpose / expected:** Fresh install: onboarding completes and the Explore feed is shown.  
-**Page objects:** onboarding_complete, app_assert_no_crash
+**Page objects:** onboarding_assert_first_launch, onboarding_complete, home_assert_feed_and_tabs, app_assert_no_crash
 
 #### 1.2 happy-search-returns-results  (TC-02)
 **Status:** GENERATED, PASSING (last full pass 2026-11-16/17).  
 **File:** `flows/android/TC02_happy_search_returns_results.yaml`  
 **Tags:** smoke, happy, search  
 **Purpose / expected:** Searching "Albert Einstein" lists the matching article with its description.  
-**Page objects:** search_enter_query, search_assert_query_text, search_assert_results_list, search_assert_results_for_einstein, app_assert_no_crash
+**Page objects:** search_enter_query, search_assert_query_text, search_assert_results_list, search_assert_results_for_einstein, search_assert_result_listed, app_assert_no_crash
 
 #### 1.3 happy-open-article-from-search  (TC-03)
 **Status:** GENERATED, PASSING (last full pass 2026-11-16/17).  
 **File:** `flows/android/TC03_happy_open_article_from_search.yaml`  
 **Tags:** regression, happy, search  
 **Purpose / expected:** Tapping a search result opens the article page.  
-**Page objects:** search_enter_query, search_assert_results_list, search_open_top_result, article_assert_loaded, app_assert_no_crash
+**Page objects:** search_enter_query, search_assert_results_list, search_open_top_result, article_assert_loaded, article_assert_title_and_actions, app_assert_no_crash
 
 #### 1.4 functional-bottom-navigation  (TC-04)
 **Status:** GENERATED, PASSING (last full pass 2026-11-16/17).  
 **File:** `flows/android/TC04_functional_bottom_navigation.yaml`  
 **Tags:** regression, functional  
 **Purpose / expected:** Every bottom-nav tab opens its screen.  
-**Page objects:** onboarding_complete, nav_go_to_tab, app_assert_no_crash
+**Page objects:** onboarding_complete, home_assert_loaded, nav_go_to_tab, saved_assert_loaded, activity_assert_intro, activity_close_intro, nav_assert_tab_visible, app_assert_no_crash
 
 #### 1.5 functional-clear-search-query  (TC-05)
 **Status:** GENERATED, PASSING (last full pass 2026-11-16/17).  
 **File:** `flows/android/TC05_functional_clear_search_query.yaml`  
 **Tags:** regression, functional, search  
 **Purpose / expected:** The X button clears the query and removes the results.  
-**Page objects:** search_enter_query, search_assert_results_for_einstein, search_clear_query, search_assert_empty, app_assert_no_crash
+**Page objects:** search_enter_query, search_assert_results_for_einstein, search_assert_clear_available, search_clear_query, search_assert_not_listed, search_assert_empty, search_assert_field_alive, app_assert_no_crash
 
 #### 1.6 functional-search-case-insensitive  (TC-06)
 **Status:** GENERATED, PASSING (last full pass 2026-11-16/17).  
@@ -70,7 +70,7 @@ local run. The CI baseline (Android 14) passed 12/12 on 2026-11-25 (UTC), GitHub
 **File:** `flows/android/TC07_negative_no_results.yaml`  
 **Tags:** regression, negative, search  
 **Purpose / expected:** A nonsense query shows the "No results" state.  
-**Page objects:** search_enter_query, search_assert_no_results, search_assert_query_text, app_assert_no_crash
+**Page objects:** search_enter_query, search_assert_no_results, search_assert_query_text, search_assert_not_listed, app_assert_no_crash
 
 #### 1.8 negative-special-characters  (TC-08)
 **Status:** GENERATED, PASSING (last full pass 2026-11-16/17).  
@@ -98,7 +98,7 @@ local run. The CI baseline (Android 14) passed 12/12 on 2026-11-25 (UTC), GitHub
 **File:** `flows/android/TC11_functional_change_search_language.yaml`  
 **Tags:** regression, functional, search, language  
 **Purpose / expected:** Adding Spanish and switching the search tab returns Spanish-language results.  
-**Page objects:** language_add, search_enter_query, search_select_language_tab, search_assert_results_for_einstein, app_assert_no_crash
+**Page objects:** search_assert_default_language, language_add, search_assert_language_tabs, search_enter_query, search_select_language_tab, search_assert_spanish_results, search_assert_results_for_einstein, app_assert_no_crash
 
 #### 1.12 functional-scroll-to-article-end  (TC-12)
 **Status:** GENERATED, PASSING (last full pass 2026-11-16/17).  

@@ -1,12 +1,11 @@
 # ANDROID - Planner (test plan from the live app)
 
 ```text
-Act as the Planner for the android Maestro suite.
+Act as the Planner for the android Maestro suite. Follow CLAUDE.md.
 
 INPUT: the ticket(s) in tickets/android/ that
 `python3 scripts/ticket_status.py android` lists as NEW or CHANGED (or the file I name).
-The ticket is the oracle for "correct". If sessions/android/*.md exploration notes
-exist for this area, read them too.
+The ticket is the oracle for "correct".
 
 Explore the live app on a booted Android emulator with Maestro (inspect_screen / maestro hierarchy,
 take_screenshot). App id: config/android.env. Install apps/android.apk (adb install -r).

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Quick Android run for debugging, without the evidence set (use run-android-report.sh for real runs).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 [[ -d pom ]] || ./scripts/sync-pom.sh

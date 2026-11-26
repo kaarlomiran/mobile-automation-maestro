@@ -17,7 +17,8 @@ res = dict(info, total=len(tests), passed=passed, failed=len(tests) - passed,
 osline = f"iOS {info.get('ios','?')} ({info.get('simulator','')})" if info["platform"] == "ios" else f"Android {info.get('android','?')} (API {info.get('api','?')})"
 md = [f"# Test run {info['run_id']}", "",
       f"- Platform: {info['platform']} | Device: {info.get('device_id','')} ({info['device']}, {info.get('device_class','')}) | {osline} | Screen {info.get('screen','?')} | App: {info['app_id']} {info['app_version']}",
-      f"- Result: **{passed}/{len(tests)} passed**, {res['failed']} failed, {res['seconds']}s total", "",
+      f"- Result: **{passed}/{len(tests)} passed**, {res['failed']} failed, {res['seconds']}s total",
+      *([f"- Selection: **partial run**, {info['selection'].strip()} only"] if info.get("selection") else []), "",
       "| # | Test | Result | Time | Tags | Note |", "|---|---|---|---|---|---|"]
 for t in tests:
     md.append(f"| {t['seq']} | {t['tc']} {t['short']} | {t['result']} | {t['seconds']}s | {', '.join(t['tags'])} | {t['reason']} |")

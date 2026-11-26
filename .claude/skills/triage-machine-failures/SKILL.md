@@ -19,7 +19,7 @@ Every failure stays reported. This skill only answers "could the machine be the 
 | Label | Meaning | What to do |
 |---|---|---|
 | APP_DEFECT_SUSPECTED | crash report, fatal exception, or the app itself not responding | report to the app team; never rerun it away |
-| MACHINE_SUSPECT | system dialog, device/driver timeout or death, blank screen tree | fix the machine condition, rerun |
+| MACHINE_SUSPECT | system dialog, device/driver timeout or death, Maestro driver not starting, blank screen tree | fix the machine condition, rerun |
 | POSSIBLE_MACHINE | only host overload / swapping, or a dismissed system dialog | check the screenshot, rerun on a quiet machine |
 | NEEDS_REVIEW | no machine signal | treat as a real failure |
 
@@ -28,6 +28,8 @@ Every failure stays reported. This skill only answers "could the machine be the 
   passing in a rerun on a healthy machine. A rerun alone, or a label alone, is not enough. A human decides.
 - Never change `results.json`, screenshots, junit files or issue folders; never delete a failed run. Add reviewer notes
   under "Triage" in `issue.md`.
+- A test whose driver never started ran no commands: its end screenshot shows what an earlier test left behind.
+- Put reviewer notes under "Triage (fill in)"; a triage rerun replaces everything from "Machine triage" down.
 - A device timeout can also be a test design problem (e.g. typing too much in one step): say so when it repeats on a
   healthy machine.
 - If the same machine signal appears in two runs, recommend a fix (settle step, fewer parallel devices, free memory,

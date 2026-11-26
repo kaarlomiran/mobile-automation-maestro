@@ -4,7 +4,7 @@ tags: [regression, negative, search]
 ---
 - runFlow: ../subflows/ios_start_on_home.yaml
 - runFlow: ../../pom/ios/pages/nav_go_to_search.yaml
-- assertNotVisible: "No results found"                # start state
+- runFlow: ../../pom/ios/pages/search_assert_no_results_absent.yaml
 - runFlow:
     file: ../../pom/ios/pages/search_enter_query.yaml
     env: { QUERY: "zzqxjvkwq9871" }

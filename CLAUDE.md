@@ -4,17 +4,18 @@
 Maestro flows for native Android and iOS apps. Maestro runs decide pass/fail; never claim a flow passes unless it was run.
 
 ## Layout
-- flows/common: cross-platform flows (use appId: ${APP_ID})
+- flows/common: reserved for cross-platform flows, empty today (use appId: ${APP_ID})
 - flows/android, flows/ios: platform-specific flows
 - flows/subflows: reusable steps (not run directly)
 - tickets/{android,ios}, specs/{android,ios}, docs/prompts/{android,ios}
-- config/*.env: per-platform APP_ID; apps.lock pins app versions
+- config/*.env: per-platform APP_ID (each run records the app version in run-info.json)
 - Never commit app binaries or secrets.
 
 ## Run
-- Android: ./scripts/run-android.sh
-- iOS: ./scripts/run-ios.sh
-- Prefer the Maestro MCP tools: list_devices, inspect_screen, run, take_screenshot.
+- Reported runs (evidence, report, output guard): ./scripts/run-android-report.sh (one device), ./scripts/run-matrix.sh
+  (all Android devices), ./scripts/run-ios-report.sh (one simulator). One test only: TC=TC07 before the command.
+- Debugging only (no run folder, never reported as a result): ./scripts/run-android.sh, ./scripts/run-ios.sh, maestro test.
+- Prefer the Maestro MCP tools while exploring: list_devices, inspect_screen, run, take_screenshot.
 
 ## Flow style
 - Prefer accessibility ids and visible text; no coordinates.
@@ -39,4 +40,5 @@ Maestro flows for native Android and iOS apps. Maestro runs decide pass/fail; ne
 ## Workflow for changes
 1. Inspect the screen (inspect_screen) before writing selectors.
 2. Run the flow on a device and fix failures.
-3. Show the diff and the run result before suggesting a commit.
+3. Run .venv/bin/python scripts/lint_suite.py and fix what it reports.
+4. Show the diff and the run result before suggesting a commit.

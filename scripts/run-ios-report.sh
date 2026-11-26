@@ -3,6 +3,7 @@
 # (same convention and the same mandatory output guard as run-android-report.sh):
 #   runs/{screenshots,recordings,trace,report,video,issues}/<YYYY-MM-DD_HHMMSS_cycle-NN_ios[_<device-id>]>/
 # Usage: ./scripts/run-ios-report.sh [tag-filter e.g. smoke]
+#        TC=TC03 ./scripts/run-ios-report.sh      only these test cases (space separated: TC="TC02 TC05")
 # Env:   DEVICE_UDID (default: first booted simulator), DEVICE_ID, DEVICE_CLASS, IOS_APP (.app to install,
 #        default apps/Wikipedia.app), CYCLE_NO, CYCLE_DATE, NO_VIDEO=1
 set -uo pipefail
@@ -11,6 +12,16 @@ PY=python3; [[ -x .venv/bin/python ]] && PY=.venv/bin/python
 [[ -d pom/ios/pages ]] || ./scripts/sync-pom.sh
 APP_ID=$(grep '^APP_ID=' config/ios.env | cut -d= -f2)
 TAG="${1:-}"
+# select the flows first, so a filter that matches nothing creates no empty run folder
+FLOWS=()
+for f in flows/ios/TC*.yaml; do
+  if [[ -n "$TAG" ]] && ! grep -q -E "^tags:.*[[ ,]$TAG[],]" "$f"; then continue; fi
+  tc=$(basename "$f" .yaml); tc=${tc%%_*}
+  if [[ -n "${TC:-}" && " $TC " != *" $tc "* ]]; then continue; fi
+  FLOWS+=("$f")
+done
+[[ ${#FLOWS[@]} -gt 0 ]] || { echo "No ios test matches tag='$TAG' TC='${TC:-}'"; exit 2; }
+SELECTION="${TAG:+tag $TAG }${TC:+test cases $TC}"
 
 DEVICE="${DEVICE_UDID:-}"
 [[ -z "$DEVICE" ]] && DEVICE=$(xcrun simctl list devices booted | grep -m1 -oE '[0-9A-F]{8}-([0-9A-F]{4}-){3}[0-9A-F]{12}')
@@ -41,12 +52,11 @@ echo "Run name: $RUN_NAME"
 
 xcrun simctl io "$DEVICE" screenshot "$REP/.probe.png" >/dev/null 2>&1
 SCREEN=$(sips -g pixelWidth -g pixelHeight "$REP/.probe.png" | awk '/pixel/{print $2}' | paste -sd x -); rm -f "$REP/.probe.png"
-printf '{"platform":"ios","cycle":"%s","device_id":"%s","device_class":"%s","simulator":"%s","ios":"%s","screen":"%s","run_id":"%s","device":"%s","app_id":"%s","app_version":"%s","started":"%s"}\n' \
-  "$CYCLE_NO" "$DEVICE_ID" "${DEVICE_CLASS:-}" "$DEV_NAME" "$OS_REL" "$SCREEN" "$RUN_NAME" "$DEVICE" "$APP_ID" "$APP_VER" "$(date +%Y-%m-%dT%H:%M:%S%z)" > "$REP/run-info.json"
+printf '{"platform":"ios","cycle":"%s","device_id":"%s","device_class":"%s","simulator":"%s","ios":"%s","screen":"%s","run_id":"%s","device":"%s","app_id":"%s","app_version":"%s","started":"%s","selection":"%s"}\n' \
+  "$CYCLE_NO" "$DEVICE_ID" "${DEVICE_CLASS:-}" "$DEV_NAME" "$OS_REL" "$SCREEN" "$RUN_NAME" "$DEVICE" "$APP_ID" "$APP_VER" "$(date +%Y-%m-%dT%H:%M:%S%z)" "$SELECTION" > "$REP/run-info.json"
 
 N=0
-for f in flows/ios/TC*.yaml; do
-  if [[ -n "$TAG" ]] && ! grep -q -E "^tags:.*[[ ,]$TAG[],]" "$f"; then continue; fi
+for f in "${FLOWS[@]}"; do
   N=$((N+1)); NN=$(printf '%02d' $N)
   base=$(basename "$f" .yaml); tc=${base%%_*}; short=$(echo "${base#*_}" | tr '_' '-')
   name="${NN}_${tc}_${short}"

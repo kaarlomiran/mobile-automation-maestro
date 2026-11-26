@@ -13,10 +13,7 @@ tags: [regression, happy, search]
 - runFlow:
     file: ../../pom/android/pages/article_assert_loaded.yaml
     env: { TAGLINE: "German-born theoretical physicist.*" }
-- assertVisible: "Albert Einstein"               # article title
-- assertVisible: "Contents"
-- assertVisible: "Language"
-- assertNotVisible:                              # left the search screen
-    id: "org.wikipedia:id/search_src_text"
-- assertNotVisible: "No results"
+- runFlow:
+    file: ../../pom/android/pages/article_assert_title_and_actions.yaml
+    env: { TITLE: "Albert Einstein" }
 - runFlow: ../../pom/android/pages/app_assert_no_crash.yaml
