@@ -1,6 +1,6 @@
 ---
 name: verify-run-outputs
-description: Mandatory output guard for every Maestro test run (Android and iOS, every device in the matrix). Invoke after EVERY run, and whenever test outputs are generated, checked or reported. Verifies the dated/cycle-numbered per-run folder convention in every output category (screenshots, recordings, trace, report, video), that nothing was skipped for any test case, and highlights variances for human review.
+description: Mandatory output guard for every Maestro test run (Android and iOS, every device in the matrix). Invoke after EVERY run, and whenever test outputs are generated, checked or reported. Verifies the dated/cycle-numbered per-run folder convention in every output category (screenshots, recordings, trace, report, video, issues), that nothing was skipped for any test case, and highlights variances for human review.
 ---
 
 # verify-run-outputs
@@ -26,6 +26,8 @@ runs/matrix/<date>_<time>_cycle-NN/summary.md                    device x test t
 
 ## Steps
 1. Runs are made with `./scripts/run-android-report.sh` (one device), `./scripts/run-matrix.sh` (all devices in `config/devices.csv`), or `./scripts/run-ios-report.sh` (same convention). They call the guard automatically.
+   One test only: `TC=TC07 ./scripts/run-android-report.sh` (or the iOS script). Report such a run as **partial**;
+   it never stands in for a full suite run.
 2. Always (re)run the guard yourself for every run just produced and read the result:
    `python3 -I scripts/verify_run_outputs.py <RUN>`
 3. Read `runs/report/<RUN>/output-check.md`. Exit code 0 = all outputs present; 1 = variances.

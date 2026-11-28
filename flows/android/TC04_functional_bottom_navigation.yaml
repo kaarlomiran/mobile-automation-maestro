@@ -6,23 +6,21 @@ tags: [regression, functional]
 - launchApp:
     clearState: true
 - runFlow: ../../pom/android/pages/onboarding_complete.yaml
-- assertVisible: "Featured article"                       # starts on Home / Explore
+- runFlow: ../../pom/android/pages/home_assert_loaded.yaml           # starts on Home / Explore
 - runFlow:
     file: ../../pom/android/pages/nav_go_to_tab.yaml
     env: { TAB_ID: nav_tab_reading_lists }
-- assertVisible: "Saved"
-- assertNotVisible: "Featured article"                    # Home content gone
+- runFlow: ../../pom/android/pages/saved_assert_loaded.yaml
 - runFlow:
     file: ../../pom/android/pages/nav_go_to_tab.yaml
     env: { TAB_ID: nav_tab_edits }
-- assertVisible: "Introducing Activity"
-- assertVisible: "Continue"
-- assertNotVisible: "Saved"
-- back
+- runFlow: ../../pom/android/pages/activity_assert_intro.yaml
+- runFlow: ../../pom/android/pages/activity_close_intro.yaml
 - runFlow:
     file: ../../pom/android/pages/nav_go_to_tab.yaml
     env: { TAB_ID: nav_tab_home }
-- assertVisible: "Featured article"                       # back on Home with content
-- assertVisible:
-    id: "org.wikipedia:id/nav_tab_home"
+- runFlow: ../../pom/android/pages/home_assert_loaded.yaml           # back on Home with content
+- runFlow:
+    file: ../../pom/android/pages/nav_assert_tab_visible.yaml
+    env: { TAB_ID: nav_tab_home }
 - runFlow: ../../pom/android/pages/app_assert_no_crash.yaml

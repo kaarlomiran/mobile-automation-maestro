@@ -7,12 +7,11 @@ tags: [regression, functional, search]
     file: ../../pom/android/pages/search_enter_query.yaml
     env: { QUERY: "Albert Einstein" }
 - runFlow: ../../pom/android/pages/search_assert_results_for_einstein.yaml
-- assertVisible:
-    id: "org.wikipedia:id/search_close_btn"      # X is offered while a query exists
+- runFlow: ../../pom/android/pages/search_assert_clear_available.yaml
 - runFlow: ../../pom/android/pages/search_clear_query.yaml
-- assertNotVisible: "German-born theoretical physicist.*"
-- assertNotVisible: "Albert Einstein College of Medicine"
+- runFlow:
+    file: ../../pom/android/pages/search_assert_not_listed.yaml
+    env: { DESCRIPTION: "German-born theoretical physicist.*", TITLE: "Albert Einstein College of Medicine" }
 - runFlow: ../../pom/android/pages/search_assert_empty.yaml
-- assertVisible:
-    id: "org.wikipedia:id/search_src_text"       # field still usable
+- runFlow: ../../pom/android/pages/search_assert_field_alive.yaml      # field still usable
 - runFlow: ../../pom/android/pages/app_assert_no_crash.yaml

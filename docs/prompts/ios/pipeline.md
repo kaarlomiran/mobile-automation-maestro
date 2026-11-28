@@ -13,7 +13,7 @@ Run the ios test pipeline for this repo. Follow CLAUDE.md.
 3. Show me the plan summary (scenario id, title, source), then continue.
 4. For each scenario not yet GENERATED: follow docs/prompts/ios/generator.md.
 5. Run the suite, invoke the verify-run-outputs skill, and if anything failed the
-   triage-machine-failures skill.
+   triage-machine-failures skill. Run .venv/bin/python scripts/lint_suite.py.
 6. python3 scripts/ticket_status.py ios  and report: tickets handled, files
    changed, results per device, every failure with its triage label, open questions.
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Run the whole suite on every enabled device in config/devices.csv, one after another.
 # Usage: ./scripts/run-matrix.sh [device-id ...]      HEADLESS=1 for no emulator windows; NO_VIDEO=1 to skip videos
+#        EMU_GPU=<mode> emulator graphics (default on macOS: host)
 # Output: one run folder per device in each category folder (see verify-run-outputs skill), all sharing ONE cycle number,
 #         plus runs/matrix/<date>_<time>_cycle-NN/summary.md
 set -uo pipefail
@@ -12,12 +13,14 @@ export CYCLE_DATE="$DATE"; export CYCLE_NO=$(printf '%02d' $(( 10#${LAST:-0} + 1
 MDIR="runs/matrix/${DATE}_$(date +%H%M%S)_cycle-$CYCLE_NO"; mkdir -p "$MDIR"
 : > "$MDIR/runs.tsv"
 WIN=""; [[ -n "${HEADLESS:-}" ]] && WIN="-no-window -no-audio"
+# graphics: use the Mac's GPU. The AVD default draws in software, which overloaded the machine (EMU_GPU=auto restores it)
+GPU="${EMU_GPU:-}"; [[ -z "$GPU" && "$(uname)" == "Darwin" ]] && GPU=host
 while IFS=, read -r id avd profile api class enabled notes <&3; do
   [[ "$enabled" == "yes" ]] || continue
   if [[ ${#ONLY[@]} -gt 0 ]] && ! printf '%s\n' "${ONLY[@]}" | grep -qx "$id"; then continue; fi
   echo "##### $id ($avd)"
   adb devices | awk '/^emulator/{print $1}' | while read s; do adb -s "$s" emu kill >/dev/null 2>&1; done; sleep 5
-  nohup emulator -avd "$avd" -no-snapshot-save $WIN > "$MDIR/emulator-$id.log" 2>&1 &
+  nohup emulator -avd "$avd" -no-snapshot-save $WIN ${GPU:+-gpu "$GPU"} > "$MDIR/emulator-$id.log" 2>&1 &
   for i in $(seq 1 60); do
     SER=$(adb devices | awk '/^emulator.*device$/{print $1; exit}')
     [[ -n "$SER" && "$(adb -s "$SER" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" == "1" ]] && break; sleep 5

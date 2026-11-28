@@ -29,6 +29,7 @@ For EACH scenario:
 
 Then run: ./scripts/run-matrix.sh (all devices in config/devices.csv), or ./scripts/run-android-report.sh for one device
 Invoke verify-run-outputs, then triage-machine-failures if anything failed.
+Run .venv/bin/python scripts/lint_suite.py and fix what it reports.
 New defects go into docs/KNOWN-ISSUES.md. Show the diff; commit only when I ask.
 Note: the POM repo must be merged before the test repo, which reads it from main.
 ```

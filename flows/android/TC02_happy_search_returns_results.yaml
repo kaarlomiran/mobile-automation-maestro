@@ -11,6 +11,7 @@ tags: [smoke, happy, search]
     env: { QUERY: "Albert Einstein" }
 - runFlow: ../../pom/android/pages/search_assert_results_list.yaml
 - runFlow: ../../pom/android/pages/search_assert_results_for_einstein.yaml
-- assertVisible: "Albert Einstein College of Medicine"   # related result also listed
-- assertNotVisible: "No results"
+- runFlow:                                              # related result also listed
+    file: ../../pom/android/pages/search_assert_result_listed.yaml
+    env: { TITLE: "Albert Einstein College of Medicine" }
 - runFlow: ../../pom/android/pages/app_assert_no_crash.yaml

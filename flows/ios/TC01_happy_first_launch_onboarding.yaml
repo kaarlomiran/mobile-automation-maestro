@@ -5,8 +5,7 @@ tags: [smoke, happy, functional]
 - launchApp:
     clearState: true
 - runFlow: ../../pom/ios/pages/onboarding_assert_first_launch.yaml
-- assertNotVisible:
-    id: "Root Tab .* Button"
+- runFlow: ../../pom/ios/pages/nav_assert_tabs_hidden.yaml
 - runFlow: ../../pom/ios/pages/onboarding_complete.yaml
 - runFlow: ../../pom/ios/pages/home_assert_loaded.yaml
 - runFlow: ../../pom/ios/pages/app_assert_no_crash.yaml

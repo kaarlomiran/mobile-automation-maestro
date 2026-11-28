@@ -1,12 +1,11 @@
 # IOS - Planner (test plan from the live app)
 
 ```text
-Act as the Planner for the ios Maestro suite.
+Act as the Planner for the ios Maestro suite. Follow CLAUDE.md.
 
 INPUT: the ticket(s) in tickets/ios/ that
 `python3 scripts/ticket_status.py ios` lists as NEW or CHANGED (or the file I name).
-The ticket is the oracle for "correct". If sessions/ios/*.md exploration notes
-exist for this area, read them too.
+The ticket is the oracle for "correct".
 
 Explore the live app on a booted iOS simulator with Maestro (inspect_screen / maestro hierarchy,
 take_screenshot). App id: config/ios.env. Install apps/Wikipedia.app (xcrun simctl install).

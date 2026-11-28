@@ -29,6 +29,7 @@ For EACH scenario:
 
 Then run: ./scripts/run-ios-report.sh (one booted simulator; repeat per device with DEVICE_UDID and DEVICE_ID)
 Invoke verify-run-outputs, then triage-machine-failures if anything failed.
+Run .venv/bin/python scripts/lint_suite.py and fix what it reports.
 New defects go into docs/KNOWN-ISSUES.md. Show the diff; commit only when I ask.
 Note: the POM repo must be merged before the test repo, which reads it from main.
 ```

@@ -1,6 +1,8 @@
 {
   "version": "2.0.0",
   "tasks": [
-    { "label": "maestro: android", "type": "shell", "command": "./scripts/run-android.sh", "problemMatcher": [] }
+    { "label": "maestro: android (report run)", "type": "shell", "command": "./scripts/run-android-report.sh", "problemMatcher": [] },
+    { "label": "maestro: ios (report run)", "type": "shell", "command": "./scripts/run-ios-report.sh", "problemMatcher": [] },
+    { "label": "maestro: lint suite", "type": "shell", "command": ".venv/bin/python scripts/lint_suite.py", "problemMatcher": [] }
   ]
 }

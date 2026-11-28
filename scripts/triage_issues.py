@@ -14,7 +14,7 @@ LOAD_PER_CPU = 4.0          # 1-minute load average divided by CPU count
 SWAP_GROWTH_MB = 1024       # macOS: swap added during one test (a high but steady swap figure is normal on macOS)
 MIN_AVAILABLE_SHARE = 0.10  # Linux: available memory compared with physical memory
 SUITE_WIDE_SHARE = 0.8      # this share of tests failing identically points at something common to the whole run
-DEVICE_ERRORS = r"DEADLINE_EXCEEDED|DeviceServerDiedException|StatusRuntimeException: UNAVAILABLE|device (?:offline|not found)|Unable to launch driver|Maestro iOS driver did not start"
+DEVICE_ERRORS = r"DEADLINE_EXCEEDED|DeviceServerDiedException|StatusRuntimeException: UNAVAILABLE|device (?:offline|not found)|Unable to launch driver|Maestro iOS driver did not start|Maestro Android driver did not start|MaestroDriverStartupException"
 MARK = "\n<!-- machine-triage -->\n"
 
 name = sys.argv[1]; root = pathlib.Path(sys.argv[2] if len(sys.argv) > 2 else "runs").resolve()

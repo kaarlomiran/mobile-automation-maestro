@@ -1,8 +1,0 @@
-android:
-  repo: https://github.com/wikimedia/apps-android-wikipedia
-  ref: <tag or commit>
-  appId: <package name of your build>
-ios:
-  repo: https://github.com/wikimedia/wikipedia-ios
-  ref: <tag or commit>
-  appId: <bundle id of your build>

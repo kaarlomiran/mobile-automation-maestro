@@ -1,0 +1,33 @@
+name: Pull request checks
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Suite rules (no device)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools and page objects
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install -q -r scripts/requirements.txt
+          ./scripts/sync-pom.sh      # reads the page-object repo at the ref in pom.lock: merge page objects first
+
+      - name: Script syntax
+        run: |
+          for f in scripts/*.sh scripts/devices/*.sh; do bash -n "$f"; done
+          .venv/bin/python -m py_compile scripts/*.py
+
+      - name: Suite rules
+        run: .venv/bin/python scripts/lint_suite.py
+
+      - name: Ticket status (information only)
+        run: .venv/bin/python scripts/ticket_status.py

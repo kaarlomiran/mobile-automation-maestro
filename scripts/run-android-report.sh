@@ -8,6 +8,7 @@
 #   runs/issues/<RUN>/NN_TCxx_.._step-SSS_<flow-part>/         one folder per failed test (evidence + issue.md)
 # <RUN> = YYYY-MM-DD_HHMMSS_cycle-NN_<platform>[_<device-id>]   (cycle-NN restarts at 01 every date)
 # Usage: ./scripts/run-android-report.sh [tag-filter e.g. smoke]
+#        TC=TC07 ./scripts/run-android-report.sh      only these test cases (space separated: TC="TC02 TC07")
 # Env:   DEVICE_SERIAL, DEVICE_ID, DEVICE_CLASS, CYCLE_NO, CYCLE_DATE (all set by run-matrix.sh), NO_VIDEO=1
 set -uo pipefail
 cd "$(dirname "$0")/.."
@@ -15,6 +16,18 @@ PY=python3; [[ -x .venv/bin/python ]] && PY=.venv/bin/python   # project venv (p
 [[ -d pom ]] || ./scripts/sync-pom.sh
 APP_ID=$(grep '^APP_ID=' config/android.env | cut -d= -f2)
 TAG="${1:-}"
+# a slow emulator can need longer than Maestro's default to start its driver; without this the test never runs
+export MAESTRO_DRIVER_STARTUP_TIMEOUT="${MAESTRO_DRIVER_STARTUP_TIMEOUT:-90000}"   # milliseconds
+# select the flows first, so a filter that matches nothing creates no empty run folder
+FLOWS=()
+for f in flows/android/TC*.yaml; do
+  if [[ -n "$TAG" ]] && ! grep -q -E "^tags:.*\b$TAG\b" "$f"; then continue; fi
+  tc=$(basename "$f" .yaml); tc=${tc%%_*}
+  if [[ -n "${TC:-}" && " $TC " != *" $tc "* ]]; then continue; fi
+  FLOWS+=("$f")
+done
+[[ ${#FLOWS[@]} -gt 0 ]] || { echo "No android test matches tag='$TAG' TC='${TC:-}'"; exit 2; }
+SELECTION="${TAG:+tag $TAG }${TC:+test cases $TC}"
 
 RUNS=runs; DATE="${CYCLE_DATE:-$(date +%Y-%m-%d)}"      # a matrix cycle keeps the date it started on (even past midnight)
 mkdir -p $RUNS/{screenshots,recordings,trace,report,video,issues}
@@ -35,15 +48,14 @@ DEVICE="${DEVICE_SERIAL:-}"
 APP_VER=$(adb -s "$DEVICE" shell dumpsys package "$APP_ID" | awk -F= '/versionName/{print $2; exit}' | tr -d '\r')
 OS_REL=$(adb -s "$DEVICE" shell getprop ro.build.version.release | tr -d '\r'); API=$(adb -s "$DEVICE" shell getprop ro.build.version.sdk | tr -d '\r')
 SCREEN=$(adb -s "$DEVICE" shell wm size | awk -F": " '{print $2}' | tr -d '\r'); AVD=$(adb -s "$DEVICE" emu avd name 2>/dev/null | head -1 | tr -d '\r')
-printf '{"platform":"android","cycle":"%s","device_id":"%s","device_class":"%s","avd":"%s","android":"%s","api":"%s","screen":"%s","run_id":"%s","device":"%s","app_id":"%s","app_version":"%s","started":"%s"}\n' \
-  "$CYCLE_NO" "${DEVICE_ID:-default}" "${DEVICE_CLASS:-}" "$AVD" "$OS_REL" "$API" "$SCREEN" "$RUN_NAME" "$DEVICE" "$APP_ID" "$APP_VER" "$(date -Iseconds)" > "$REP/run-info.json"
+printf '{"platform":"android","cycle":"%s","device_id":"%s","device_class":"%s","avd":"%s","android":"%s","api":"%s","screen":"%s","run_id":"%s","device":"%s","app_id":"%s","app_version":"%s","started":"%s","selection":"%s"}\n' \
+  "$CYCLE_NO" "${DEVICE_ID:-default}" "${DEVICE_CLASS:-}" "$AVD" "$OS_REL" "$API" "$SCREEN" "$RUN_NAME" "$DEVICE" "$APP_ID" "$APP_VER" "$(date -Iseconds)" "$SELECTION" > "$REP/run-info.json"
 
 # environment hygiene (logged to report/<RUN>/environment.log): clear system "not responding" dialogs before testing
 ./scripts/devices/settle-emulator.sh "$DEVICE" "$APP_ID" 4 | sed "s/^/suite-start\t/" | tee -a "$REP/environment.log"
 
 N=0
-for f in flows/android/TC*.yaml; do
-  if [[ -n "$TAG" ]] && ! grep -q -E "^tags:.*\b$TAG\b" "$f"; then continue; fi
+for f in "${FLOWS[@]}"; do
   N=$((N+1)); NN=$(printf '%02d' $N)
   base=$(basename "$f" .yaml); tc=${base%%_*}; short=$(echo "${base#*_}" | tr '_' '-')
   name="${NN}_${tc}_${short}"

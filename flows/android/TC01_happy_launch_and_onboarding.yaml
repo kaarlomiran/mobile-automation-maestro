@@ -4,16 +4,7 @@ tags: [smoke, happy, functional]
 ---
 - launchApp:
     clearState: true
-- assertVisible: "All the world's knowledge"      # onboarding page 1 is shown on fresh install
-- assertVisible: "Learn more about Wikipedia"
-- assertNotVisible: "No results"
+- runFlow: ../../pom/android/pages/onboarding_assert_first_launch.yaml
 - runFlow: ../../pom/android/pages/onboarding_complete.yaml
-- assertNotVisible: "Forward"                     # carousel fully dismissed
-- assertNotVisible: "All the world's knowledge"
-- assertVisible: "Featured article"               # Explore feed content rendered
-- assertVisible: "Home"
-- assertVisible: "Saved"
-- assertVisible: "Search"
-- assertVisible: "Activity"
-- assertVisible: "More"
+- runFlow: ../../pom/android/pages/home_assert_feed_and_tabs.yaml
 - runFlow: ../../pom/android/pages/app_assert_no_crash.yaml

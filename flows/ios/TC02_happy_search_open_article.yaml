@@ -4,7 +4,7 @@ tags: [smoke, happy, search]
 ---
 - runFlow: ../subflows/ios_start_on_home.yaml
 - runFlow: ../../pom/ios/pages/nav_go_to_search.yaml
-- assertVisible: "No history to show"                 # clean start state
+- runFlow: ../../pom/ios/pages/search_assert_clean_start.yaml
 - runFlow:
     file: ../../pom/ios/pages/search_enter_query.yaml
     env: { QUERY: "Albert Einstein" }
